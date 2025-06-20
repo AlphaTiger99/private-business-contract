@@ -13,11 +13,12 @@
     <!-- Application Structure Plan: The application is structured as a single-page dashboard with a clear navigation menu. This thematic approach allows users to quickly access specific areas of interest (e.g., Financials, IP, Assistant, Appendices) without reading the entire legal document linearly. The structure prioritizes usability and comprehension over the original clause order. Key interactions include a dynamic profit calculator, toggle-able sections for detailed clause text, visual diagrams to simplify complex relationships, an LLM-powered assistant for on-demand summaries and Q&A, and new accordion-style sections for each appendix. -->
     <!-- Visualization & Content Choices: 
         - Report Info: Parties & Core Deal -> Goal: Quick Understanding -> Viz/Presentation: Cards & Flowchart -> Interaction: Static -> Justification: Provides immediate high-level context. -> Library/Method: HTML/CSS.
-        - Report Info: Responsibilities (Clauses 3, 4) -> Goal: Clear Division of Labor -> Viz/Presentation: Two-column list with icons -> Interaction: Click-to-reveal detailed clause text -> Justification: Allows for easy comparison of roles and access to the source text. -> Library/Method: JS for toggling visibility.
-        - Report Info: Profit Calculation (Clause 6) -> Goal: Demystify financials -> Viz/Presentation: Donut Chart and Interactive Calculator -> Interaction: Dynamic update via input field -> Justification: Visualizes the complex profit formula, making it tangible and easy to understand. -> Library/Method: Chart.js.
-        - Report Info: Term & Termination (Clause 11) -> Goal: Understand timeline and exit strategies -> Viz/Presentation: HTML/CSS Timeline & Accordion -> Interaction: Hover on timeline points, click to expand termination scenarios -> Justification: Breaks down a long, conditional section into manageable, context-specific pieces. -> Library/Method: JS for interaction.
-        - Report Info: General Contract Content -> Goal: On-demand clarification & summarization -> Viz/Presentation: Text input & display area -> Interaction: User enters question/clicks summary button, LLM provides text response -> Justification: Provides direct, context-aware answers to specific user queries using the Gemini API. -> Library/Method: Gemini API, Vanilla JS.
-        - Report Info: Appendices (A, B, C, D) -> Goal: Provide supplementary details in an organized way -> Viz/Presentation: Accordion sections with detailed text/tables -> Interaction: Click to expand/collapse appendix content -> Justification: Keeps the main flow clean while allowing users to drill down into specific legal/operational details of the appendices as needed. -> Library/Method: HTML/CSS, Vanilla JS for accordion.
+        - Report Info: Responsibilities (Clauses 3) -> Goal: Clear Division of Labor -> Viz/Presentation: Detailed lists with sub-headings -> Interaction: Static text, but clearly organized for readability -> Justification: Presents complex responsibilities in a digestible, hierarchical manner, allowing users to quickly grasp the division of tasks.
+        - Report Info: Profit Calculation (Clause 6) -> Goal: Demystify financials -> Viz/Presentation: Donut Chart and Interactive Calculator with detailed text explanation -> Interaction: Dynamic update via input field -> Justification: Visualizes the complex profit formula and clarifies its components, making it tangible and easy to understand. -> Library: Chart.js.
+        - Report Info: Term & Termination (Clause 11) -> Goal: Understand timeline and exit strategies -> Viz/Presentation: HTML/CSS Timeline & Accordion with expanded content -> Interaction: Hover on timeline points, click to expand termination scenarios -> Justification: Breaks down a long, conditional section into manageable, context-specific pieces, including new content on continuity. -> Library: JS for interaction.
+        - Report Info: General Contract Content -> Goal: On-demand clarification & summarization -> Viz/Presentation: Text input & display area -> Interaction: User enters question/clicks summary button, LLM provides text response -> Justification: Provides direct, context-aware answers to specific user queries using the Gemini API. -> Library: Gemini API, Vanilla JS.
+        - Report Info: Appendices (A, B, C, D) -> Goal: Provide supplementary details in an organized way -> Viz/Presentation: Accordion sections with detailed text/tables -> Interaction: Click to expand/collapse appendix content -> Justification: Keeps the main flow clean while allowing users to drill down into specific legal/operational details of the appendices as needed. -> Library: HTML/CSS, Vanilla JS for accordion.
+        - Report Info: Full Agreement -> Goal: Provide complete legal text -> Viz/Presentation: Formatted document-like display -> Interaction: Scrollable -> Justification: Offers the full, well-structured legal text for reference, designed for readability and compliance with legal document aesthetics.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
@@ -65,6 +66,57 @@
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
         }
+        /* Styling for the full contract section to look like a document */
+        .prose-document {
+            font-family: 'Assistant', sans-serif;
+            line-height: 1.8;
+            text-align: right;
+            direction: rtl;
+            font-size: 0.95rem; /* Slightly larger than prose default */
+            color: #374151; /* gray-700 */
+        }
+        .prose-document h1, .prose-document h2, .prose-document h3, .prose-document h4, .prose-document h5, .prose-document h6 {
+            text-align: right;
+            margin-top: 2em;
+            margin-bottom: 0.8em;
+            font-weight: 700;
+            color: #1F2937; /* gray-900 */
+        }
+        .prose-document h1 { font-size: 2.25rem; } /* text-4xl */
+        .prose-document h2 { font-size: 1.875rem; } /* text-3xl */
+        .prose-document h3 { font-size: 1.5rem; } /* text-2xl */
+        .prose-document h4 { font-size: 1.25rem; } /* text-xl */
+        .prose-document p, .prose-document ul, .prose-document ol, .prose-document table {
+            margin-bottom: 1em;
+        }
+        .prose-document strong { font-weight: 700; color: #1F2937; } /* gray-900 */
+        .prose-document em { font-style: italic; }
+        .prose-document ul { list-style-type: disc; padding-right: 1.5em; }
+        .prose-document ol { list-style-type: decimal; padding-right: 1.5em; }
+        .prose-document li { margin-bottom: 0.5em; }
+        .prose-document table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+        .prose-document th, .prose-document td {
+            border: 1px solid #E5E7EB; /* gray-200 */
+            padding: 0.75em;
+            text-align: right;
+        }
+        .prose-document th {
+            background-color: #F9FAFB; /* gray-50 */
+            font-weight: 600;
+        }
+        .prose-document .indent {
+            padding-right: 2em; /* Indent for sub-points like (א), (ב) */
+        }
+        .prose-document .section-num {
+            font-weight: 700;
+            color: #1F2937;
+            margin-left: 0.5em;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
@@ -73,7 +125,7 @@
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">ניתוח אינטראקטיבי: הסכם שיתוף פעולה מסחרי</h1>
-            <p class="text-lg text-gray-600 mt-2">פתרונות מזון בע"מ <span class="font-sans font-bold mx-2">↔</span> ויגוזה בייקרי בע"מ</p>
+            <p class="text-lg text-gray-600 mt-2">דגניך ותירושך בע"מ <span class="font-sans font-bold mx-2">↔</span> ויגוזה בייקרי בע"מ</p>
         </header>
 
         <!-- Navigation -->
@@ -96,21 +148,23 @@
             <section id="overview" class="tab-content active space-y-8">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">מהות העסקה: שותפות אסטרטגית</h2>
-                    <p class="text-gray-700 leading-relaxed">הסכם זה מבסס שיתוף פעולה בין **ויגוזה בייקרי בע"מ**, בעלת מותג וקניין רוחני ייחודי בתחום הבייקרי הטבעוני, לבין **פתרונות מזון בע"מ**, חברה בעלת יכולות ייצור, שיווק והפצה נרחבות. חברה ב' מעניקה לחברה א' רישיון בלעדי לשימוש במותג ובמתכונים, וחברה א' אחראית לממן, לייצר, לשווק ולמכור את המוצרים. בתמורה, הצדדים מתחלקים ברווח הנקי באופן שווה (50/50). זהו מודל הממנף את החדשנות של חברה ב' עם העוצמה המסחרית של חברה א'.</p>
+                    <p class="text-gray-700 leading-relaxed">הסכם זה מבסס שיתוף פעולה בין **ויגוזה בייקרי בע"מ**, בעלת מותג וקניין רוחני ייחודי בתחום הבייקרי הטבעוני, לבין **דגניך ותירושך בע"מ**, חברה בעלת יכולות ייבוא, שיווק והפצה בשוק המוסדי בתחום מוצרי מזון מן הצומח.</p>
+                    <p class="text-gray-700 leading-relaxed mt-2">צד ב' מעניק לצד א' רישיון בלעדי, בלתי חוזר, לשימוש במותג "VGOZA" ובקניין הרוחני (מתכונים, רכיבים, טכניקות ייצור ועוד). בתמורה, צד א' אחראי לממן את תהליכי הפיתוח, הייצור, השיווק וההפצה של המוצרים. הרווח הנקי מהמוצרים יתחלק בחלקים שווים (50% לכל צד) לאחר ניכוי עלויות מוגדרות.</p>
+                    <p class="text-gray-700 leading-relaxed mt-2">זוהי שותפות אסטרטגית הממנפת את הקניין הרוחני והחדשנות של צד ב' עם העוצמה המסחרית, התשתית והגישה לשוק המוסדי של צד א', ונועדה להבטיח צמיחה הדדית של המותג "VGOZA".</p>
                 </div>
                 
                 <div class="grid md:grid-cols-2 gap-6">
                     <!-- Company A -->
                     <div class="bg-white p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-bold mb-3 text-blue-700">חברה א': פתרונות מזון בע"מ</h3>
-                        <p class="text-gray-600">חברת מזון מבוססת עם התמחות בייצור, אחסון, שיווק ומכירת מוצרים מן הצומח. בעלת יכולות רגולטוריות ולוגיסטיות מוכחות.</p>
-                        <p class="mt-4 font-semibold text-gray-800">תפקיד מרכזי: <span class="font-normal">הזרוע המסחרית והמבצעת.</span></p>
+                        <h3 class="text-xl font-bold mb-3 text-blue-700">צד א': דגניך ותירושך בע"מ</h3>
+                        <p class="text-gray-600">חברה העוסקת בטכנולוגיית מזון (Food-Tech) ומפעילה מערך ייבוא, שיווק והפצה של מוצרי מזון מן הצומח, בעיקר בשוק ה-B2B המוסדי (מסעדות, קייטרינג, אולמות אירועים).</p>
+                        <p class="mt-4 font-semibold text-gray-800">תפקיד מרכזי: <span class="font-normal">הזרוע המבצעת, המממנת והמשווקת של מוצרי המותג VGOZA.</span></p>
                     </div>
                     <!-- Company B -->
                     <div class="bg-white p-6 rounded-lg shadow-md">
-                        <h3 class="text-xl font-bold mb-3 text-green-700">חברה ב': ויגוזה בייקרי בע"מ</h3>
-                        <p class="text-gray-600">חברה שפיתחה סדרת מוצרי בייקרי טבעוני ייחודיים תחת המותג "VGOZA", כולל מתכונים וטכניקות ייצור סודיות.</p>
-                        <p class="mt-4 font-semibold text-gray-800">תפקיד מרכזי: <span class="font-normal">היזמית ובעלת הקניין הרוחני.</span></p>
+                        <h3 class="text-xl font-bold mb-3 text-green-700">צד ב': ויגוזה בייקרי בע"מ</h3>
+                        <p class="text-gray-600">בעלת המותג המסחרי "ויגוזה / V-GOZA" והקניין הרוחני הייחודי בתחום הבייקרי הטבעוני ומוצרי מזון מן הצומח (מתכונים, פורמולציות, טכניקות ייצור חדשניות).</p>
+                        <p class="mt-4 font-semibold text-gray-800">תפקיד מרכזי: <span class="font-normal">היזמית, מפתחת הקניין הרוחני ובעלת המותג VGOZA, המעניקה רישיון לשימוש בו.</span></p>
                     </div>
                 </div>
 
@@ -119,15 +173,15 @@
                     <div class="flex flex-col sm:flex-row items-center justify-around space-y-4 sm:space-y-0 sm:space-x-4">
                         <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
                             <div class="text-4xl mb-2">🧠</div>
-                            <h4 class="font-semibold text-green-800">חברה ב' מספקת</h4>
-                            <p class="text-sm text-green-700">מותג וקניין רוחני</p>
+                            <h4 class="font-semibold text-green-800">צד ב' מספק</h4>
+                            <p class="text-sm text-green-700">מותג וקניין רוחני (ברישיון)</p>
                         </div>
                         <div class="flow-arrow hidden sm:block"></div>
                         <div class="w-px h-8 sm:hidden flow-line"></div>
                         <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                             <div class="text-4xl mb-2">🏭</div>
-                            <h4 class="font-semibold text-blue-800">חברה א' מייצרת ומוכרת</h4>
-                            <p class="text-sm text-blue-700">מימון, ייצור, שיווק והפצה</p>
+                            <h4 class="font-semibold text-blue-800">צד א' מממן, מייצר ומוכר</h4>
+                            <p class="text-sm text-blue-700">פיתוח, ייצור, שיווק והפצה</p>
                         </div>
                         <div class="flow-arrow hidden sm:block"></div>
                          <div class="w-px h-8 sm:hidden flow-line"></div>
@@ -144,63 +198,111 @@
             <section id="responsibilities" class="tab-content space-y-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">חלוקת אחריויות ותפקידים</h2>
-                    <p class="text-gray-700 leading-relaxed">ההסכם מגדיר בבירור את תחומי האחריות של כל צד כדי להבטיח תפעול שוטף ויעיל. חברה א' אחראית על כל ההיבטים המסחריים והלוגיסטיים, בעוד חברה ב' אחראית על שמירת איכות המוצר וליווי מקצועי של הייצור.</p>
+                    <p class="text-gray-700 leading-relaxed">ההסכם מפרט במדויק את תחומי האחריות של כל צד, כדי להבטיח יעילות מקסימלית ושקיפות בתפעול השותפות. צד א' פועל כ"זרוע המבצעת" המממנת ומוציאה לפועל את תהליכי המסחור, בעוד צד ב' משמש כ"זרוע היוצרת" האחראית על הקניין הרוחני ופיקוח איכות הייצור. בנוסף, קיימים תחומי אחריות משותפים לשני הצדדים.</p>
                 </div>
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
-                        <h3 class="text-xl font-bold mb-4 text-blue-700">חברה א' - פתרונות מזון בע"מ (הזרוע המבצעת)</h3>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-start">
-                                <span class="text-blue-500 mr-3 mt-1">✔</span>
-                                <span><b>מימון מלא:</b> כיסוי כל עלויות הייצור, השיווק וההפצה.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-blue-500 mr-3 mt-1">✔</span>
-                                <span><b>ייצור ולוגיסטיקה:</b> בחירת מפעל צד ג', ניהול ייצור, אחסון והפצה.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-blue-500 mr-3 mt-1">✔</span>
-                                <span><b>רגולציה ותשתיות:</b> אחריות על ביטוח חבות מוצר, כשרות, תיקי מוצר ותוויות.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-blue-500 mr-3 mt-1">✔</span>
-                                <span><b>שיווק ומכירות:</b> פיתוח אסטרטגיה וביצוע מכירות בכל הערוצים.</span>
-                            </li>
-                             <li class="flex items-start">
-                                <span class="text-blue-500 mr-3 mt-1">✔</span>
-                                <span><b>דיווח ושקיפות:</b> הפקת דוחות מכירה חודשיים מפורטים.</span>
-                            </li>
+                        <h3 class="text-xl font-bold mb-4 text-blue-700">צד א' - "הזרוע המבצעת"</h3>
+                        <p class="text-gray-700 font-semibold mb-2">א. מימון וליווי כספי:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>צד א’ יישא במלוא המימון הנדרש לפיתוח-מוצר, הקמת קווי-ייצור, מימון מלאי, אריזות, פעילויות שיווק ומכירות, שירות לקוחות, תהליכי Recall (אם יידרשו), ביטוחי חבות-מוצר וכל תשלום לצדדים שלישיים הקשור למימוש ההסכם.</li>
+                            <li>צד א’ יממן כל פעילות רגולטורית, לרבות אגרות רישוי, בדיקות מעבדה, רישום תקני ISO/HACCP, והעסקת יועצים חיצוניים.</li>
                         </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ב. ייצור, לוגיסטיקה וניהול מפעל צד ג’:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>צד א’ יבחר, בחוות-דעת מקצועית ובאישור מוקדם מצד ב’, מפעל צד ג’ בעל רישיונות תקפים ממשרד הבריאות ורשות הכשרות המוסמכת.</li>
+                            <li>צד א’ יהיה אחראי לניהול ההתקשרות החוזית עם המפעל, הפעלת מערך ייצור, בקרת מלאי, אחסון, קירור ושינוע בתנאים העומדים בתקנים.</li>
+                            <li>צד א’ ידאג לכיול תקופתי של ציוד, תחזוקה מונעת והטמעת נהלי GMP (Good Manufacturing Practice).</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ג. רגולציה, איכות וביטוח:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>תיק מוצר (Specification File), תוויות מוצר, סימון אלרגנים, הצגת ערכים תזונתיים ואישורי כשרות יטופלו במלואם ע״י צד א’.</li>
+                            <li>צד א’ יחזיק פוליסות ביטוח חבות-מוצר ו-Product Recall בסכום שלא יפחת מ-₪___ מיליון לכל אירוע; אישור ביטוח חתום יצורף לנספח ה’.</li>
+                            <li>במקרה של דרישת רגולטור (לדוגמה: משרד הבריאות) לביצוע שינוי או ריקול, נשיאה בעלות המלאה ודיווח לצד ב’ ללא דיחוי.</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ד. שיווק, מכירות והפצה:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>צד א’ ישלב את מוצרי V-GOZA במאגר הלקוחות הקמעונאיים והמוסדיים שלו, ויקצה מנהל מותג ייעודי.</li>
+                            <li>אסטרטגיית מדיה, תמחור, מבצעים והטבות יוגשו לאישור צד ב’ בכתב אחת לרבעון; אי-תגובה מצד ב’ בתוך 7 ימי עסקים תיחשב כהסכמה.</li>
+                            <li>צד א’ יפיק דו״ח מכירות חודשי מפורט עד ל-20 בחודש שלאחריו, במבנה הקבוע בנספח ד’.</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ה. שקיפות ודיווח:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>מערכת Google Sheets מוגנת-גישה תכלול נתוני מכירות, החזרות, עלויות ישירות ונלוות בזמן-אמת.</li>
+                            <li>אפשרות לצד ב’ לבצע ביקורת ספרים מדגמית אחת לשנה (בהודעה של 10 ימים). סטייה של > 2% תחויב בהחזר הפרש + ריבית.</li>
+                        </ul>
+                        <p class="text-gray-600 mt-4 text-sm leading-relaxed">כל פעולה, מחדל או הוצאה שלא הוקצו במפורש לצד ב’ ייחשבו כחלק ממחויבויות צד א’, אלא אם סוכם אחרת בכתב.</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
-                        <h3 class="text-xl font-bold mb-4 text-green-700">חברה ב' - ויגוזה בייקרי בע"מ (הזרוע היוצרת)</h3>
-                        <ul class="space-y-3 text-gray-700">
-                            <li class="flex items-start">
-                                <span class="text-green-500 mr-3 mt-1">✔</span>
-                                <span><b>העברת ידע:</b> מסירת כל המתכונים, הרכיבים והטכניקה הסודית.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-green-500 mr-3 mt-1">✔</span>
-                                <span><b>פיקוח על איכות:</b> ניהול ופיקוח על תהליך הייצור במפעל להבטחת איכות.</span>
-                            </li>
-                            <li class="flex items-start">
-                                <span class="text-green-500 mr-3 mt-1">✔</span>
-                                <span><b>שותפות אסטרטגית:</b> השתתפות באפיון לוחות זמנים להשקות ופיתוח מוצרים.</span>
-                            </li>
-                             <li class="flex items-start">
-                                <span class="text-green-500 mr-3 mt-1">✔</span>
-                                <span><b>בעלות על הקניין הרוחני:</b> שמירה על הבעלות במותג ובמתכונים.</span>
-                            </li>
+                        <h3 class="text-xl font-bold mb-4 text-green-700">צד ב' - "הזרוע היוצרת"</h3>
+                        <p class="text-gray-700 font-semibold mb-2">א. העברת ידע (Technology Transfer):</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>מילוי ועדכון מלוא המתכונים, הפורמולציות, נהלי SOP ושלבי-ייצור, בתוכנת רישום שתיבחר ע"י שני הצדדים לאחר חתימת החוזה, ובאופן מתואם אל מול סרגל זמנים של מועדי ההשקה לכל מוצר ותכנון זמני ייצור את מלוא המתכונים, הפורמולציות, נהלי SOP ושלבי-ייצור, בפורמט דיגיטלי מוגן (PDF מוצפן או מערכת קבצים מאובטחת). מקור נתונים זה יהיה שקוף בין שני הצדדים, והוא ישמר באופן בטוח ביניהם בלבד, למעט במקרים בהם יש צורך להציג או לשתף גורם נוסף לצורך הבטחת ותקינות המוצר כפוף לרגולציה ואז תהייה חובתו של צד א' לוודא שהשיתוף מידע לצד ג' נשמר ומוגן, וזאת על ידי נספח מתאים.</li>
+                            <li>כל העברה תלווה ב-“Batch Record” מפורט ובמפרט טכני (Bill-of-Materials) לרכיבים קריטיים.</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ב. פיקוח מקצועי ואבטחת איכות:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>מינוי טכנולוג-מזון בכיר כמפקח צמוד ל-Manufacturing Start-Up, לרבות ניסוי-פיילוט ואישור Run-Rate תעשייתי.</li>
+                            <li>בכל חריגה מתקן איכות, אספקת הנחיות לתיקון תוך 48 שעות; צד א’ יישם את ההנחיות וידווח על ביצוען.</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ג. פיתוח מוצרים ושדרוגים:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>מיפוי, אחת לשישה חודשים, של מוצרים חדשים או שדרוגי-פורמולציה והגשת NPI (New Product Introduction) Roadmap ללוח השקות (נספח א’).</li>
+                            <li>עלויות פיתוח חומרי-גלם חדשים ימומנו ע״י צד א’, בכפוף לאישור דו-צדדי של Business Case מפורט.</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ד. בעלות וקניין רוחני:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>שמירה על מלוא הזכויות במותג V-GOZA, סימני המסחר וה-Know-How.</li>
+                            <li>פיתוחים עתידיים יהיו קניין צד ב’, אולם יוקנו אוטומטית ברישיון בלעדי לצד א’ ללא תמלוג-ביניים נוסף, בכפוף להסכם זה.</li>
+                        </ul>
+                        <p class="text-gray-700 font-semibold mb-2">ה. שיתוף-פעולה אסטרטגי:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+                            <li>השתתפות בישיבות רבעוניות של Steering Committee לדיון ב-KPI (מכירות, שיעור החזרות, יעילות ייצור).</li>
+                            <li>במיקוד אירועי-שיא (תערוכות, חגים, השקות בינ״ל) העמדת שגרירי-מותג, שפים ומומחי תוכן שיווקי, בתיאום צד א’.</li>
                         </ul>
                     </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-gray-400">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">תחומי אחריות משותפים</h3>
+                    <ul class="list-disc list-inside space-y-3 text-gray-700">
+                        <li><b>בקרת סיכונים:</b> גיבוש משותף של “מפת סיכונים” (Risk-Matrix) שנתית ותיקונה לפי צורך.</li>
+                        <li><b>קיימוּת (ESG):</b> פעולה משותפת לצמצום טביעת-רגל פחמנית, שימוש באריזות מתמחזרות ולציות לתקני B-Corp ככל שיאומצו.</li>
+                        <li><b>התנהלות מול הרשויות:</b> טיפול משותף בפניות רגולטוריות חריגות (דרישת Recall מחייב, התראה פלילית, קנס מנהלי) תוך 24 שעות ממועד קבלתן.</li>
+                    </ul>
+                    <p class="text-gray-600 mt-4 text-sm leading-relaxed">**הבהרה:** כל סעיף בלשון זכר/יחיד ייקרא גם בלשון נקבה/רבים לפי העניין. במקרה של אי-התאמה בין מסמך זה לנספחיו תגבר הוראת המסמך הראשי, אלא אם הנספח קובע במפורש אחרת.</p>
                 </div>
             </section>
 
             <!-- Financials Section -->
             <section id="financials" class="tab-content space-y-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h2 class="text-2xl font-bold mb-4 text-gray-800">המנגנון הפיננסי: חלוקת רווחים 50/50</h2>
-                    <p class="text-gray-700 leading-relaxed">ההסכם מגדיר מנגנון שקוף לחישוב הרווח הנקי, אשר מתחלק באופן שווה בין הצדדים. מנגנון זה מבטיח כי שני הצדדים שותפים להצלחה הכלכלית של המותג. הזינו סכום מכירות חודשי (ברוטו) כדי לראות סימולציה של החישוב.</p>
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">המנגנון הפיננסי: חלוקת רווחים ושקיפות</h2>
+                    <p class="text-gray-700 leading-relaxed">ההסכם מבסס מנגנון פיננסי שקוף והוגן לחלוקת הרווחים מהמסחור המוצרים, המשקף את תרומת כל צד לשותפות. הרווח הנקי מוגדר במדויק ומתחלק בחלקים שווים (50% לכל צד) לאחר ניכוי עלויות מוגדרות. הסעיף מפרט את העקרונות העסקיים והמתודולוגיה לחישוב ההכנסות המשותפות, ואת חובות הדיווח והשקיפות.</p>
+                    <p class="text-gray-700 leading-relaxed mt-2">**עקרונות חישוב הרווח הנקי (סעיף 6.1 בהסכם המלא):**</p>
+                    <ul class="list-disc list-inside text-gray-700">
+                        <li>**הכנסות ברוטו:** סך המכירות ברוטו של המוצרים.</li>
+                        <li>**הפחתות:**
+                            <ul class="list-circle list-inside ml-4">
+                                <li>מע"מ (לפי שיעור חוקי).</li>
+                                <li>4% עלויות נלוות קבועות (לכיסוי עלויות תפעול ועבודה שוטפות).</li>
+                                <li>עלויות ישירות: רכישת חומרי גלם, עלויות אריזות, תשלום למפעל צד ג', והוצאות שיווק שאושרו מראש ובכתב על ידי שני הצדדים.</li>
+                            </ul>
+                        </li>
+                        <li>**רווח נקי:** הסכום שנותר לאחר כל ההפחתות.</li>
+                        <li>**חלוקה:** 50% לצד א' ו-50% לצד ב'.</li>
+                    </ul>
+                    <p class="text-gray-700 leading-relaxed mt-2">**הוצאות חריגות / שאינן קשורות ישירות למוצרים (סעיף 6.4א בהסכם המלא):**</p>
+                    <ul class="list-disc list-inside text-gray-700">
+                        <li>**הגדרה:** כל תשלום או התחייבות כספית שאינה מסווגת כ"עלויות ישירות" או "עלויות נלוות קבועות (4%)", ואינה הכרחית במישרין לייצור, שיווק או מכירה שוטפת של המוצרים.</li>
+                        <li>**יוזם ההוצאה:** הצד המבקש לבצע הוצאה חריגה ימציא לצד השני פנייה כתובה הכוללת תיאור, סכום משוער, מטרה, מועד וחלוקת עלות מוצעת.</li>
+                        <li>**אישור, שינוי או דחייה:** הצד הנבחן ישיב בכתב תוך 14 ימי עסקים (אי-תגובה תיחשב דחייה). אישור יכול להיות מלא או מותנה, או דחייה מנומקת.</li>
+                        <li>**נשיאת עלות ברירת-מחדל:** אם ההוצאה לא אושרה, הצד היוזם רשאי לבצעה על חשבונו, וסכום זה לא יוכר בחישוב הרווח הנקי.</li>
+                        <li>**רישום ובקרה חשבונאית:** הוצאה מאושרת תירשם בטבלת GL Codes (נספח ה’) תחת קטגוריה “הוצאות חריגות מאושרות”.</li>
+                    </ul>
+                    <p class="text-gray-700 leading-relaxed mt-2">**חשב-בורר לסיווג עלויות (סעיף 6.5 בהסכם המלא):**</p>
+                    <p class="text-gray-700 leading-relaxed">מחלוקת בדבר סיווג או גובה עלות שתיזקף כ"עלויות ישירות" או "עלויות נלוות קבועות" תועבר לרואה-חשבון מבקר עצמאי ("חשב-בורר") שימונה בהסכמת הצדדים בתוך 7 ימים. בהיעדר הסכמה, ימונה על ידי יו״ר לשכת רו״ח בישראל. החלטתו סופית ומחייבת, ושכר טרחתו יישא בחלקים שווים. מנגנון זה מבטיח פתרון הוגן למחלוקות פיננסיות.</p>
+                    <p class="text-gray-700 leading-relaxed mt-2">צד א' יספק דוחות מכירות דיגיטליים מפורטים עד ה-20 בכל חודש, והצדדים יקיימו פגישות חודשיות לסקירה ואישור הדוחות, תוך שמירה על שקיפות מלאה.</p>
+
                 </div>
 
                 <div class="grid lg:grid-cols-2 gap-6">
@@ -235,33 +337,34 @@
             <section id="ip" class="tab-content space-y-6">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">קניין רוחני וסודיות</h2>
-                    <p class="text-gray-700 leading-relaxed">זהו לב ליבו של ההסכם. מוגדרת הפרדה ברורה בין בעלות על נכסים לבין זכויות השימוש בהם. חברה ב' שומרת על הבעלות המלאה על הנכסים שיצרה, בעוד חברה א' מקבלת את הזכויות הנדרשות כדי למסחר אותם, מה שמגן על שני הצדדים.</p>
+                    <p class="text-gray-700 leading-relaxed">זהו לב ליבו של ההסכם. מוגדרת הפרדה ברורה בין בעלות על נכסים לבין זכויות השימוש בהם. צד ב' שומר על הבעלות המלאה על הנכסים שיצרה, בעוד צד א' מקבל את הרישיון הבלעדי הנדרש כדי למסחר אותם, מה שמגן על שני הצדדים ומאפשר לצד א' להכניס את המותג של צד ב' לשאר מותגיה.</p>
                 </div>
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                        <h3 class="text-xl font-bold mb-3 text-green-700">בבעלות חברה ב' (ויגוזה)</h3>
+                        <h3 class="text-xl font-bold mb-3 text-green-700">בבעלות צד ב' (ויגוזה)</h3>
                          <ul class="list-disc list-inside space-y-2 text-gray-700">
                             <li><b>המותג "VGOZA":</b> השם, הלוגו והמוניטין.</li>
-                            <li><b>הקניין הרוחני הקולינרי:</b> כל המתכונים, הטכניקות הסודיות והידע.</li>
-                            <li><b>פיתוחים עתידיים:</b> כל מוצר חדש שיופק תחת המותג.</li>
+                            <li><b>הקניין הרוחני (מתכונים, פורמולציות, Know-How):</b> כל המתכונים, הטכניקות הסודיות והידע הייחודי בתחום הבייקרי הטבעוני ומוצרי מזון מן הצומח.</li>
+                            <li><b>פיתוחים עתידיים:</b> כל מוצר חדש שיופק תחת המותג, יישאר בבעלות צד ב'.</li>
                         </ul>
+                        <p class="text-sm text-gray-500 mt-2">הקניין הרוחני של צד ב' מוגן על פי כל דין, ומקנה לצד ב' זכויות בלעדיות לייצור, שיווק והפצה של המוצרים הייחודיים.</p>
                     </div>
                     <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                        <h3 class="text-xl font-bold mb-3 text-blue-700">ברישיון בלעדי לחברה א' (פתרונות מזון)</h3>
-                        <p class="text-gray-700">חברה א' מקבלת רישיון **בלעדי, עולמי ובלתי חוזר** להשתמש בכל הנכסים של חברה ב' (המותג והקניין הרוחני) לצורך ייצור, שיווק ומכירה של המוצרים.</p>
-                        <p class="mt-2 text-sm text-gray-500">רישיון זה תקף לכל תקופת ההסכם, ואינו כרוך בתשלום נוסף מעבר לחלוקת הרווחים.</p>
+                        <h3 class="text-xl font-bold mb-3 text-blue-700">ברישיון בלעדי לצד א' (דגניך ותירושך)</h3>
+                        <p class="text-gray-700">צד א' מקבל רישיון **בלעדי, בלתי חוזר, עולמי ובר-העברה** (בכפוף לאישור צד ב') לשימוש במותג VGOZA ובקניין הרוחני של צד ב' לצורך ייצור, שיווק, הפצה ומכירה של מוצרי ויגוזה בישראל (ובטריטוריות נוספות המפורטות בהסכם).</p>
+                        <p class="mt-2 text-sm text-gray-500">רישיון זה תקף לכל תקופת ההסכם ולאחריה, ללא הגבלת זמן, ואינו כרוך בתשלום נוסף מעבר לחלוקת הרווחים.</p>
                     </div>
                 </div>
                  <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-bold mb-3 text-gray-800">התחייבות לסודיות ואי-תחרות</h3>
                      <div class="space-y-4">
                          <div>
-                            <h4 class="font-semibold text-gray-700">סודיות (סעיף 7)</h4>
-                            <p class="text-gray-600">שני הצדדים מתחייבים לשמירה מוחלטת על מידע חסוי (מתכונים, נתונים פיננסיים וכו') **ללא הגבלת זמן**, גם לאחר סיום ההסכם. חברה א' מחויבת להחתים כל צד שלישי רלוונטי (כמו מפעלים) על הסכמי סודיות.</p>
+                            <h4 class="font-semibold text-gray-700">סודיות (סעיף 7 בהסכם המלא)</h4>
+                            <p class="text-gray-600">שני הצדדים ויועציהם מתחייבים לשמירה מוחלטת על מידע חסוי (מתכונים, נתונים פיננסיים, תוכניות עסקיות, טכניקות ייצור ועוד) **ללא הגבלת זמן**, גם לאחר סיום ההסכם. צד א' מחויב להחתים כל צד שלישי רלוונטי (כמו מפעלים) על הסכמי סודיות, ולדווח לצד ב' על שימוש במידע חסוי על ידי צדדים שלישיים.</p>
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-700">אי-תחרות (סעיף 12)</h4>
-                            <p class="text-gray-600">במהלך ההסכם ו-**2 שנים** לאחר סיומו, שני הצדדים ובעלי מניותיהם מתחייבים לא להתחרות במותג VGOZA בקטגוריית הבייקרי הטבעוני, בישראל ובחו"ל.</p>
+                            <h4 class="font-semibold text-gray-700">אי-תחרות (סעיף 12 בהסכם המלא)</h4>
+                            <p class="text-gray-600">במהלך ההסכם ו-**2 שנים** לאחר סיומו, שני הצדדים ובעלי מניותיהם מתחייבים לא לעסוק במישרין או בעקיפין בפיתוח, ייצור, שיווק או מכירה של מוצרים מתחרים לקטגוריית המותג VGOZA (בייקרי טבעוני, קינוחים, גבינות ועוד), בישראל ובחו"ל.</p>
                         </div>
                      </div>
                 </div>
@@ -271,7 +374,15 @@
             <section id="term" class="tab-content space-y-6">
                  <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">תקופת ההסכם ותנאי סיום</h2>
-                    <p class="text-gray-700 leading-relaxed">ההסכם נבנה לשותפות ארוכת טווח, עם מנגנוני חידוש אוטומטיים, אך כולל גם נקודות יציאה מוגדרות ותנאים ברורים לסיום ההתקשרות במקרה של הפרה או נסיבות אחרות.</p>
+                    <p class="text-gray-700 leading-relaxed">ההסכם נבנה לשותפות ארוכת טווח, עם מנגנוני חידוש אוטומטיים, אך כולל גם נקודות יציאה מוגדרות ותנאים ברורים לסיום ההתקשרות במקרה של הפרה, חדלות פירעון, שינוי שליטה או נסיבות אחרות. חשוב לציין שהתחייבויות מסוימות נשארות בתוקף גם לאחר סיום ההסכם.</p>
+                     <p class="text-gray-700 leading-relaxed mt-2">**המשכיות ותוקף (סעיף 4 בהסכם המלא):**</p>
+                    <ul class="list-disc list-inside text-gray-700 space-y-1">
+                        <li>**תחולה על ממשיכים ויורשים:** ההסכם יחול גם על יורשי הצדדים, נציגיהם, נאמניהם, רוכשיהם וכל חליף או מקבל-זכויות אחר (Successors & Assigns), לרבות גוף שינבע ממיזוג, פיצול, שינוי צורת התאגדות, העברת שליטה או מכירת נכסים רלוונטיים.</li>
+                        <li>**שינוי שם או צורת התאגדות:** שינוי בשם הרשום, במבנה ההחזקות או בצורת ההתאגדות של צד כלשהו לא ישפיע על תוקף ההסכם, והתחייבויותיו יוסיפו לעמוד בתוקפן.</li>
+                        <li>**מיזוג, מכירה או פירוק:** כל מיזוג, מכירה או העברת שליטה מותנים בכך שהישות הקולטת תיטול על עצמה בכתב, כתנאי מתלה, את כל זכויות וחובות ההסכם. במקרה של פירוק, יוסדר העברת הקניין הרוחני וההרשאות לצד השני.</li>
+                        <li>**ערבות בעלי-מניות (רשות):** בעלי המניות המייסדים של צד ב' (שמותיהם ומספרי זהותם יפורטו בנספח **) ערבים אישית, כל אחד לחוד, למילוי התחייבויות צד ב' כלפי מתן הרישיון ושמירת תוקפו עד תום תקופת ההסכם, גם אם צד ב' יחדל מלהתקיים כתאגיד.</li>
+                        <li>**ביטול ופרעון מוקדם:** אירוע שינוי שליטה, פירוק או חדלות-פירעון המונע מצדו של צד לקיים חיוב מהותי יזכה את הצד הנפגע בכל תרופות הדין – לרבות אכיפה או ביטול ההסכם ופיצוי מלא, לפי בחירתו, ולא יפגע בזכויות צד א' להמשיך לעבוד עם זכויות המוצרים והטכניקה של צד ב'.</li>
+                    </ul>
                 </div>
                 
                 <div class="bg-white p-6 rounded-lg shadow-md">
@@ -292,45 +403,53 @@
                         </div>
                     </div>
                     <ul class="list-disc list-inside space-y-2 text-gray-700 mt-4">
-                        <li><b>תקופה ראשונית:</b> 10 שנים.</li>
-                        <li><b>חידוש אוטומטי:</b> מתחדש אוטומטית ל-10 שנים נוספות, אלא אם ניתנה הודעה 180 יום מראש.</li>
-                        <li><b>נקודות יציאה:</b> כל 5 שנים, ניתן לסיים את ההסכם בהודעה של 90 יום מראש ובהסכמה הדדית.</li>
+                        <li><b>תקופה ראשונית:</b> 10 שנים ממועד החתימה.</li>
+                        <li><b>חידוש אוטומטי:</b> מתחדש אוטומטית לתקופות נוספות של 10 שנים, אלא אם ניתנה הודעה 180 יום מראש על אי-רצון לחדש.</li>
+                        <li><b>נקודות יציאה:</b> כל 5 שנים (למשל, בתום 5, 10, 15 שנים), ניתן לסיים את ההסכם בהודעה של 90 יום מראש ובהסכמה הדדית. במקרה של חוסר הסכמה, תופנה המחלוקת לבוררות.</li>
                     </ul>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="text-xl font-bold mb-4 text-gray-800">עילות לסיום ההסכם</h3>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">עילות לסיום ההסכם והשלכותיו</h3>
                     <div id="termination-accordion" class="space-y-2">
                         <div class="border rounded-lg">
                             <button class="w-full text-right p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors flex justify-between items-center rounded-t-lg">
-                                <span>הפרה יסודית</span>
+                                <span>הפרה יסודית (סעיף 11.4 בהסכם המלא)</span>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </button>
                             <div class="details-box bg-white p-4 border-t">
-                                <p class="text-gray-600">אם צד אחד מפר את ההסכם באופן מהותי, לצד השני יש 30 ימי עסקים לתקן את ההפרה. אם לא תוקנה, ניתן לסיים את ההסכם במיידי. (סעיף 11.4)</p>
+                                <p class="text-gray-600">אם צד אחד מפר את ההסכם באופן מהותי, לצד השני יש 30 ימי עסקים לתקן את ההפרה. אם לא תוקנה, ניתן לסיים את ההסכם במיידי.</p>
                             </div>
                         </div>
                         <div class="border rounded-lg">
                             <button class="w-full text-right p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors flex justify-between items-center">
-                                <span>חדלות פירעון</span>
+                                <span>חדלות פירעון (סעיף 11.5 בהסכם המלא)</span>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </button>
                             <div class="details-box bg-white p-4 border-t">
-                                <p class="text-gray-600">אם אחד הצדדים נכנס להליכי פירוק, פשיטת רגל או כינוס נכסים, הצד השני רשאי לסיים את ההסכם במיידי. (סעיף 11.5)</p>
+                                <p class="text-gray-600">אם אחד הצדדים נכנס להליכי פירוק, פשיטת רגל או כינוס נכסים, הצד השני רשאי לסיים את ההסכם במיידי.</p>
                             </div>
                         </div>
                         <div class="border rounded-lg">
                             <button class="w-full text-right p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors flex justify-between items-center">
-                                <span>השלכות הסיום</span>
+                                <span>שינוי שליטה/מיזוג/פירוק (סעיף 4 בהסכם המלא)</span>
                                 <span class="transform transition-transform duration-300">▼</span>
                             </button>
                             <div class="details-box bg-white p-4 border-t">
-                                <p class="text-gray-600">בסיום ההסכם, הרישיון של חברה א' פוקע. סעיפים מהותיים כמו סודיות ואי-תחרות (לתקופה של שנתיים) נשארים בתוקף. (סעיפים 11.7, 11.8, 12.3)</p>
+                                <p class="text-gray-600">כל מיזוג, מכירה או העברת שליטה בישות כלשהי מהצדדים מותנים בכך שהישות הקולטת תיטול על עצמה, בכתב וכתנאי מתלה, את כל זכויות וחובות ההסכם. במקרה של פירוק או כינוס נכסים, יוסדר העברת הקניין הרוחני והרישיונות לצד השני. שינוי שליטה, פירוק או חדלות פירעון המונע קיום חיוב מהותי בהסכם, יזכה את הצד הנפגע בכל תרופות הדין, כולל אכיפה או ביטול ופיצוי מלא.</p>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg">
+                            <button class="w-full text-right p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors flex justify-between items-center">
+                                <span>השלכות הסיום (סעיפים 11.7, 11.8, 12.3 בהסכם המלא)</span>
+                                <span class="transform transition-transform duration-300">▼</span>
+                            </button>
+                            <div class="details-box bg-white p-4 border-t">
+                                <p class="text-gray-600">בסיום ההסכם מכל סיבה שהיא, הרישיון הבלעדי של צד א' פוקע. סעיפים מהותיים כמו סודיות (ללא הגבלת זמן), אי-תחרות (לתקופה של שנתיים לאחר הסיום), קניין רוחני ושיפוי – נשארים בתוקף מלא. צד א' תוכל להמשיך לסיים פעילות קיימת באופן הדרגתי ובתיאום עם צד ב'.</p>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </section>
             
             <!-- Assistant Section (New LLM Feature) -->
@@ -342,7 +461,7 @@
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-bold mb-4 text-gray-800">שאל שאלה</h3>
-                    <textarea id="assistantQuestion" class="w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" placeholder="לדוגמה: מהן חובות חברה א' בנוגע לרגולציה? או: סכם/י את סעיף האי-תחרות."></textarea>
+                    <textarea id="assistantQuestion" class="w-full p-3 border rounded-md focus:ring-blue-500 focus:border-blue-500 resize-y min-h-[100px]" placeholder="לדוגמה: מהן חובות צד א' בנוגע לרגולציה? או: סכם/י את סעיף האי-תחרות."></textarea>
                     <button id="askAssistantBtn" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
                         שאל/י את העוזר
                         <span id="assistantLoading" class="loading-spinner ml-2 hidden"></span>
@@ -425,7 +544,7 @@
             <section id="full-agreement" class="tab-content">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h2 class="text-2xl font-bold mb-4 text-gray-800">ההסכם המלא</h2>
-                    <div class="prose max-w-none text-gray-700 text-sm leading-relaxed max-h-[60vh] overflow-y-auto p-4 border rounded-md bg-gray-50">
+                    <div class="prose-document max-w-none text-gray-700 leading-relaxed max-h-[70vh] overflow-y-auto p-4 border rounded-md bg-gray-50">
                         <!-- Full contract text will be injected here by JS -->
                         <div id="full-contract-text">
                         </div>
@@ -442,179 +561,298 @@
                 mainAgreement: `
 # הסכם שיתוף פעולה מסחרי
 
-**שנערך ונחתם בתל אביב, ביום [ ] לחודש [ ], שנת 2025**
+**שנערך ונחתם בתל אביב, ביום ___ ________ 20__**
 
 **בין:**
 
-**1. פתרונות מזון בע"מ** (ח.פ. 123456789), חברה המאוגדת והרשומה כדין בישראל, שמשרדה הרשום ברחוב התעשייה 10, תל אביב, ישראל, אשר תיוצג לצורך חתימה על הסכם זה על ידי [שם הנציג], [תפקיד] (להלן: "**חברה א'**").
+<div class="indent">
+    <p><span class="section-num">1.</span> **דגניך ותירושך בע"מ** (DGANICJA VATIROSHACH LTD) ח.פ. 516861341, התאגדה בישראל ביום 24.08.2023 (ז׳ באלול תשפ״ג), ומענהּ הרשום ב-__________ (להלן: "**צד א'**").</p>
+    <p><span class="section-num">לבין:</span></p>
+    <p><span class="section-num">2.</span> **ויגוזה בייקרי בע"מ** (V-GOZA BAKERY LTD) ח.פ. 517028734, התאגדה בישראל ביום 18.08.2024 (י״ד באב תשפ״ד), ומענהּ הרשום ב-__________ (להלן: "**צד ב'**").</p>
+</div>
 
-**הגדרת חברה א' ועיסוקה:** חברה א' עוסקת, בין היתר, בייצור, אחסון, שיווק ומכירה של מוצרי מזון מן הצומח, והינה הבעלים של מספר מותגי מזון מובילים. חברה א' בעלת מומחיות וניסיון רב בניהול תשתיות רגולטוריות, הכנת תיקי מוצר, הנפקת תוויות, קבלת אישורי כשרות, ניהול ביטוח חבות מוצר וניהול לוגיסטיקה מקיף בתחום המזון.
+<p>(צד א' וצד ב' יקראו יחד להלן: "**הצדדים**" וכל אחד מהם בנפרד: "**צד**")</p>
 
-**לבין:**
+## מבוא והצהרות הצדדים
 
-**2. ויגוזה בייקרי בע"מ** (ח.פ. 517028734), חברה המאוגדת והרשומה כדין בישראל מיום 18/08/2024, י"ד באב תשפ"ד, על פי חוק החברות, התשנ"ט-1999, שמשרדה הרשום ברחוב השלום 5, חיפה, ישראל, אשר תיוצג לצורך חתימה על הסכם זה על ידי [שם הנציג], [תפקיד] (להלן: "**חברה ב'**").
+<p class="indent">**הואיל** וצד א' עוסק בטכנולוגיית מזון (Food-Tech) ומפעיל מערך ייבוא, שיווק והפצה של מוצרים מן הצומח, בדגש על השוק המוסדי (B2B);</p>
+<p class="indent">**והואיל** וצד ב' הוא בעל המותג V-GOZA ומחזיק בקניין רוחני ייחודי בתחום הבייקרי הטבעוני, הכולל מתכונים, פורמולציות, רשימות רכיבים וטכניקות ייצור חדשניות ("**הקניין הרוחני**");</p>
+<p class="indent">**והואיל** והקניין הרוחני מוגן על-פי כל דין, ומקנה לצד ב' זכויות בלעדיות לייצור, שיווק והפצה של המוצרים הייחודיים;</p>
+<p class="indent">**והואיל** והצדדים מבקשים לכונן שותפות אסטרטגית במסגרתה יקבל צד א' רישיון בלעדי, בלתי חוזר, לשימוש במותג ובקניין הרוחני לצורך ייצור, שיווק ומכירה של מוצרי ויגוזה בישראל (ובטריטוריות נוספות שיפורטו);</p>
+<p class="indent">**והואיל** ובמסגרת שותפות זו, צד א' יממן את הפיתוח, הייצור, השיווק, ההפצה והמכירה, והצדדים יתחלקו ברווח הנקי בחלקים שווים (50 % | 50 %);</p>
+<p class="indent">**והואיל** והצדדים מצהירים כי המידע והמסמכים שהוצגו נכונים למועד החתימה ומתחייבים לדווח על כל שינוי מהותי;</p>
 
-**הגדרת חברה ב' ועיסוקה:** חברה ב', באמצעות בעלי מניותיה – גב' דפנה [שם משפחה] וגב' אורית [שם משפחה] (להלן יחד: "**בעלי המניות של חברה ב'**") – פיתחה סדרת מוצרי מזון ייחודיים תחת המותג "VGOZA", המתאפיינים בהיותם מוצרי בייקרי טבעוני. חברה ב' ובעלי מניותיה הינן הבעלות הבלעדיות על הטכניקה, המתכונים והידע הסודי (Know-How) הקשורים לפיתוח וייצור מוצרים אלו. חברה ב' מספקת לחברה א' את המתכונים, הרכיבים, הכמויות, והטכניקה הסודית של המוצרים, וכן אחראית לפיקוח מקצועי על תהליך הייצור במפעל צד ג'.
+<p><strong>לפיכך, לאחר שקללו את ההצהרות דלעיל, הוסכם, הוצהר והותנה בין הצדדים כדלקמן:</strong></p>
 
-(חברה א' וחברה ב' תיקראנה יחד להלן: "**הצדדים**" וכל אחת מהן בנפרד: "**צד**")
+---
 
-**מבוא והצהרות (והואיל):**
+## 1. הגדרות ופרשנות
 
-**הואיל** והצדדים מעוניינים לשתף פעולה באופן מסחרי ואסטרטגי, במטרה למסחר ולהפיץ סדרת מוצרי מזון חדשניים, מן הצומח, תחת המותג "VGOZA" (להלן: "**המותג**");
-**והואיל** והמותג "VGOZA" וסדרת המוצרים הכלולים בו מייצגים קטגוריה חדשנית של "בייקרי טבעוני" שאינה נמצאת כיום בליבת הפעילות העסקית של חברה א', ובכך קיימת התאמה אסטרטגית וסינרגיה עסקית בין הצדדים, ללא ניגוד אינטרסים מהותי;
-**והואיל** וחברה א' מביאה לשולחן השותפות את מומחיותה הנרחבת בתחומי הייצור, האחסון, השיווק, המכירה והלוגיסטיקה, יחד עם היותה בעלת תשתיות רגולטוריות מבוססות (כגון ביטוח חבות מוצר, אישורי כשרות, תיקי מוצר, תוויות וניהול אצוות) ומוכנות ליישום עבור מגוון רחב של מוצרים, לרבות אלו שפותחו על ידי בעלי המניות של חברה ב';
-**והואיל** וחברה ב' ובעלי מניותיה הינן היוצרות והבעלות הבלעדיות של הקניין הרוחני הקולינרי (כהגדרתו להלן) של המוצרים, לרבות המתכונים, הטכניקה הסודית והידע הייחודי הקשור אליהם;
-**והואיל** ובמסגרת שיתוף פעולה זה, ומתוך ראייה עסקית נכונה וחכמה לעתיד מניב עבור כל הצדדים, חברה ב' בוחרת להעניק לחברה א' **רישיון בלעדי לשימוש** במותג "VGOZA" ובקניין הרוחני הקולינרי, בכפוף לתנאים המפורטים בהסכם זה, במטרה להפוך את סל המוצרים הנוכחי והעתידי לברי השקה ומובילים בשוק הישראלי, הן ברשתות קמעונאיות והן בתחום המוסדי;
-**והואיל** ושני הצדדים מכירים בפוטנציאל העסקי האדיר של המותג VGOZA ושואפים להפוך אותו למותג-על איכותי וחדשני, ומתחייבים לפעול במשותף ובתום לב להגשמת מטרות הסכם זה והבאתו לידי בר קיימא;
-**והואיל** והצדדים מסכימים על חלוקת רווחים הוגנת ושקופה, ועל הגנה הדדית על המותג ועל זכויות הקניין הרוחני של כל צד;
+<p class="indent"><span class="section-num">1.1.</span> "<strong>הסכם</strong>" – מסמך זה על נספחיו, כפי שיעודכן בכתב.</p>
+<p class="indent"><span class="section-num">1.2.</span> "<strong>המותג</strong>" – השם VGOZA, לרבות סימני-מסחר, לוגו, עיצובים ומוניטין, בבעלות צד ב'.</p>
+<p class="indent"><span class="section-num">1.3.</span> "<strong>המוצרים</strong>" – כל מוצר שפותח או יפותח תחת המותג על-ידי צד ב', בעלי-מניותיו או בשיתוף צד א', לרבות 40 המוצרים הראשונים.</p>
+<p class="indent"><span class="section-num">1.4.</span> "<strong>הקניין הרוחני</strong>" – מתכונים, פורמולציות, רשימות רכיבים, טכניקות ייצור ו-Know-How ייחודי בבעלות צד ב'.</p>
+<p class="indent"><span class="section-num">1.5.</span> "<strong>הרווח הנקי</strong>" – המכירות ברוטו פחות: (א) מע״מ; (ב) 4 % עלויות נלוות קבועות; (ג) עלויות ישירות (חומרי-גלם, אריזה, מפעל צד ג', שיווק מאושר).</p>
+<p class="indent"><span class="section-num">1.6.</span> "<strong>מידע חסוי</strong>" – כל מידע בעל ערך מסחרי שנמסר במהלך ההתקשרות ואינו נחלת הכלל.</p>
+<p class="indent"><span class="section-num">1.7.</span> "<strong>מפעל צד ג'</strong>" – יצרן מזון מורשה שייבחר ע״י צד א' ובאישור מוקדם מטעם צד ב'.</p>
+<p class="indent"><span class="section-num">1.8.</span> "<strong>רישיון בלעדי</strong>" – זכות השימוש שהוקנתה לצד א' במותג ובקניין הרוחני למשך ההסכם.</p>
+<p class="indent"><span class="section-num">1.9.</span> **פרשנות**: כותרות לשם נוחות; יחיד | רבים וזכר | נקבה – לפי ההקשר; "ימי עסקים" – א׳-ה׳, לא כולל ערבי-חג וחגים.</p>
 
-**לפיכך, מתוך רצון משותף, ברוח של שיתוף פעולה איתן ובהתבסס על ההצהרות ההדדיות וההבנות המפורטות לעיל, הוסכם, הוצהר והותנה בין הצדדים כדלקמן:**
+---
 
-**1. הגדרות ופרשנות**
-1.1. **"הסכם"**: מסמך זה על כל נספחיו, כפי שיתוקן או יושלם בכתב בהסכמה הדדית של הצדדים.
-1.2. **"המותג"**: השם המסחרי VGOZA, לרבות כל סימני המסחר, הלוגו, העיצובים והמוניטין הקשורים אליו, בבעלותה הבלעדית של חברה ב'.
-1.3. **"המוצרים"**: כל מוצרי המזון שפיתחה או תפתח חברה ב' ו/או בעלי המניות של חברה ב' ו/או בשיתוף פעולה עם חברה א', תחת המותג, לרבות סדרת 40 המוצרים הראשונית ומוצרים עתידיים שיוספו בהסכמה.
-1.4. **"הקניין הרוחני הקולינרי"**: כל זכויות הקניין הרוחני הקשורות במתכונים, ברכיבים, בכמויות, בטכניקות הייצור הייחודיות, בשיטות הפיתוח ובידע הסודי (Know-How) של המוצרים, לרבות הטכניקה הסודית הספציפית של VGOZA, בבעלותה הבלעדית של חברה ב'.
-1.5. **"הרווח הנקי"**: הסכום שנותר לאחר הפחתת: (א) מע"מ (לפי השיעור הקבוע בחוק), (ב) עלויות נלוות קבועות בגובה 4% מסך המכירות, (ג) עלויות ישירות (חומרי גלם, אריזה, תשלום למפעל צד ג', עלויות שיווק שאושרו מראש).
-1.6. **"מידע חסוי"**: מתכונים, רכיבים, כמויות, טכניקות ייצור, נתוני מכירות, מידע פיננסי, תוכניות עסקיות, רשימות לקוחות, סודות מסחריים, וכל מידע אחר, בין אם כתוב, בעל פה, חזותי או אלקטרוני, בעל ערך מסחרי, אשר יוגדר כחסוי על ידי הצדדים או שעל פי נסיבות העניין סביר להניח כי הינו מידע סודי וחסוי, ואשר נחשף לצד השני (או למי מטעמו) במהלך או בקשר לשיתוף הפעולה על פי הסכם זה.
-1.7. **"מפעל צד ג'"**: מפעל ייצור מזון מורשה, בעל כל הרישיונות וההיתרים הנדרשים על פי דין, לרבות ממשרד הבריאות, אשר ייבחר ויופעל על ידי חברה א' לצורך ייצור המוצרים.
-1.8. **"רישיון בלעדי"**: הרישיון הבלעדי והמוענק לחברה א' על פי תנאי הסכם זה, לשימוש במותג ובקניין הרוחני הקולינרי של חברה ב', לצרכי ייצור, שיווק ומכירה של המוצרים, בכפוף לבעלותה הבלעדית של חברה ב' במותג ובקניין הרוחני הקולינרי.
-1.9. **פרשנות**: כותרות הסעיפים הינן לנוחות בלבד ולא תשמשנה לפרשנות. המבוא והנספחים מהווים חלק בלתי נפרד מהסכם זה. השימוש בלשון יחיד/רבים וזכר/נקבה יכלול גם את המין והמספר השני, לפי העניין. "ימי עסקים" הינם ימי עבודה בישראל, למעט שישי, שבת, ערבי חג וחג.
+## 2. מטרת ההסכם והיקף שיתוף הפעולה
 
-**2. מטרת ההסכם והיקף שיתוף הפעולה**
-2.1. מטרת הסכם זה הינה להסדיר את מערכת היחסים המסחרית והעסקית בין הצדדים, לרבות חלוקת תפקידים, אחריות, זכויות רישוי קניין רוחני, תמורה כספית ותנאי סיום, הכל במטרה למסחר, לייצר, לשווק ולמכור את המוצרים בהצלחה תחת המותג.
-2.2. שיתוף הפעולה בין הצדדים הינו שיתוף פעולה מסחרי לכל דבר ועניין, ואין לפרשו כיוצר יחסי שותפות, מיזם משותף, יחסי עובד-מעסיק, סוכנות או כל יחסים משפטיים אחרים, למעט אלו המפורטים במפורש בהסכם זה. כל צד יישא באחריות הבלעדית לניהול עסקיו ופעולותיו, ולא יהיה רשאי לחייב או לקשור את הצד השני בהתחייבויות כלשהן, למעט בכפוף להסכמה מפורשת ובכתב.
+<p class="indent"><span class="section-num">2.1.</span> הסדרת היחסים המסחריים: חלוקת תפקידים, אחריות, רישוי, תמורה וסיום.</p>
+<p class="indent"><span class="section-num">2.2.</span> השותפות היא מסחרית; אין ליצור יחסי שותפות, העסקה או סוכנות מעבר למפורט.</p>
 
-**3. תפקידי הצדדים**
-3.1. **תפקידי חברה א'**
-* **קבלת הרישיון הבלעדי**: קבלת הרישיון הבלעדי לשימוש במותג ובקניין הרוחני הקולינרי של חברה ב' כמפורט בסעיף 5 להלן.
-* **מימון מלא**: מימון מלא של כל העלויות הנלוות לייצור, שיווק והפצה (לרבות חומרי גלם, אריזות, ייצור, פרסום וקידום מכירות).
-* **אחסון וניהול מלאי**: אחסון וניהול מלאי המוצרים במחסניה ובמתקני לוגיסטיקה מטעמה.
-* **רגולציה ותשתיות**: הקמה וניהול של כל התשתיות הרגולטוריות הנדרשות, לרבות קבלת אישורי כשרות, ביטוח חבות מוצר, הכנת תיקי מוצר, תוויות וניהול אצוות ייצור.
-* **שיווק ומכירה**: שיווק ומכירת המוצרים בכל הערוצים הרלוונטיים – קמעונאות, מוסדי, אונליין – ובכלל זה הוספת המותג לפורטפוליו המותגים של חברה א' ופיתוח אסטרטגיית שיווק מקיפה.
-* **שקיפות ודיווח**: הקמה וניהול של מערכת דיגיטלית לשקיפות מלאה בדוחות מכירות לחברה ב', כמפורט בסעיף 6.
-3.2. **תפקידי חברה ב'**
-* **הענקת רישיון בלעדי**: הענקת הרישיון הבלעדי לחברה א' לשימוש במותג ובקניין הרוחני הקולינרי, כמפורט בסעיף 5 להלן, לצורך ייצור ושיווק מקצועיים, שימור ערכי המותג ויצירת רווחיות מקסימלית לשני הצדדים.
-* **פיקוח מקצועי על ייצור**: פיקוח צמוד וניהול מקצועי של תהליך הייצור במפעל צד ג' (שייבחר על ידי חברה א'), להבטחת עמידה בתקני איכות, בטיחות מזון ורגולציה, ומתן מענה וידע שוטף לחברה א' לגבי תהליכים קריטיים מטעמי בטיחות ואיכות.
-* **אפיון לוח זמנים להשקות ופיתוח מוצרים**: שותפות באפיון לוח זמנים להשקות (קביעת סדר ומועדי השקה לכל אחד מהמוצרים), ותמיכה וסיוע בפיתוח מוצרים חדשים ושיפור מוצרים קיימים במסגרת המותג.
+---
 
-**4. תנאי אספקה ותיאום ייצור**
-4.1. **אפיון לוח זמנים להשקות**: בתוך 14 ימי עסקים ממועד חתימת ההסכם, הצדדים יקיימו פגישת עבודה משותפת לאפיון לוח זמנים מפורט להשקת המוצרים הראשונים, אשר ייחתם על ידם וייכלל כנספח א' להסכם זה. לוח הזמנים יעודכן מעת לעת בהסכמה הדדית ובכתב, בהתאם לצרכי השוק והתפתחויות עסקיות.
-4.2. **מסירת קניין רוחני קולינרי ופיקוח (חברה ב')**: חברה ב' תספק לחברה א' באופן מלא, ובאופן מאובטח ומוגן, את רשימת המוצרים, המתכונים המלאים, הרכיבים, הכמויות המדויקות ואפיון טכני מלא לכל מוצר (כולל פורמטים מוסכמים לתיק מוצר ולתגי תווית). חברה ב' תפקח על תהליך הייצור במפעל צד ג', תוך הקפדה מחמירה על עמידה בתקני בטיחות, איכות ורגולציה.
-4.3. **בחירת מפעל ומימון תשתיות (חברה א')**: חברה א' תבחר ותנהל את מפעל צד ג', על בסיס שיקולים עסקיים, תפעוליים ורגולטוריים, ותממן את הקמת התשתיות הנדרשות לייצור, אחסון וניהול מלאי המוצרים.
-4.4. **תיאום וקידום (חברה א')**: חברה א' תתאם ותסנכרן בין הזמנות קיימות ועתידיות לבין אנשי הקשר: יצרן, ספקי חומרי גלם, רגולטורים וצוותי א' וב'. בנוסף, חברה א' תפעל לקידום מכירות, שיפור תהליכים, הגברת מודעות למותג ובניית קשרים חיצוניים רלוונטיים.
-4.5. **הזמנות וכמויות ייצור**: כמויות הייצור ייקבעו על-ידי חברה א' בהזמנה כתובה שתועבר לחברה ב', או לפי אפיון משותף שיתקיים מעת לעת (למשל, לקראת עונות עומס תקופתיות או חגים).
-4.6. **דיווח על סטיות**: חברה ב' תדווח לחברה א' בהקדם על כל סטייה משמעותית בתהליך הייצור או עיכובים בלתי צפויים.
-4.7. **זמינות מלאי**: שני הצדדים יפעלו במשותף להבטחת זמינות מלאי מספקת של המוצרים בשוק, לרבות תכנון מראש לעונות עומס תקופתיות ואירועים מיוחדים.
+## 3. תפקידי הצדדים ואחריותם
 
-**5. קניין רוחני, בעלות ורישוי**
-5.1. **בעלות על המותג**: מובהר ומוסכם כי **חברה ב' הינה הבעלים הבלעדי, המלא והמוחלט של המותג VGOZA**, לרבות כל סימני המסחר, שמות המתחם, הלוגו, המוניטין, העיצובים וכל זכויות הקניין הרוחני הקשורות למותג זה, בכל מקום בעולם. חברה א' מכירה ומוקירה בזאת את בעלותה של חברה ב' במותג.
-5.2. **בעלות על הקניין הרוחני הקולינרי**: מובהר ומוסכם כי **חברה ב' ובעלי מניותיה הינן הבעלים הבלעדיים, המלאים והמוחלטים של הקניין הרוחני הקולינרי** (כהגדרתו לעיל), לרבות המתכונים, הטכניקה הסודית והידע הייחודי הקשור אליהם, בכל מקום בעולם.
-5.3. **הענקת רישיון בלעדי לחברה א'**: חברה ב' ובעלי המניות של חברה ב' מעניקות בזאת לחברה א' **רישיון בלעדי, בלתי חוזר, עולמי, ללא תמורה נוספת** (מעבר לחלקה ברווח הנקי כמפורט בסעיף 6), ובר-העברה (לרבות רישיונות משנה לצדדים שלישיים, בכפוף לאישור מראש ובכתב מחברה ב'), לשימוש במותג ובקניין הרוחני הקולינרי לצורך ייצור, שיווק, הפצה ומכירה של המוצרים תחת המותג, וזאת לכל תקופת ההסכם ולאחריה, ללא הגבלת זמן.
-5.4. **פיתוחים עתידיים והקניין הרוחני בהם**: כל פיתוח, שיפור או שינוי בקניין הרוחני הקולינרי, וכן כל פיתוח מוצר חדש תחת המותג, שייעשה על ידי מי מהצדדים, או בשיתוף פעולה ביניהם, במהלך תקופת ההסכם ולאחריה, יהווה חלק בלתי נפרד מהקניין הרוחני הקולינרי ויהיה כפוף לרישיון הבלעדי שהוענק לחברה א' בסעיף 5.3 לעיל. בעלות הקניין הרוחני בפיתוחים כאמור תישאר בידי חברה ב'.
-5.5. **הגנה על קניין רוחני**: כל צד מתחייב לנקוט בכל האמצעים הסבירים והנדרשים להגנה על הקניין הרוחני של הצד השני, ובפרט על המותג והקניין הרוחני הקולינרי של חברה ב' ועל זכויות הרישוי של חברה א'. הצדדים ישתפו פעולה באופן מלא ובמהירות בכל עניין הקשור להגנה על זכויות הקניין הרוחני מפני כל הפרה, שימוש לא מורשה או טענה של צד שלישי.
+הפרק מפרט את התחייבויות כל צד, בניסוח חוזי מחייב ובחלוקה לתתי-נושאים. כל פעולה, מחדל או הוצאה שלא הוקצו במפורש לצד ב’ ייחשבו כחלק ממחויבויות צד א’, אלא אם סוכם אחרת בכתב.
 
-**6. תמורה כספית ותנאי תשלום**
-הצדדים מצהירים ומסכימים כי התמורה עבור הרישיון לשימוש בקניין הרוחני, פיקוח הייצור ומתן השירותים על ידי חברה ב', תתבסס על חלוקת הרווח הנקי ממכירות מוצרי המותג באופן שווה בין הצדדים, בהתאם למנגנון הבא:
-6.1. **חישוב הרווח הנקי וחלוקתו**
-בסעיף זה מפורטות העקרונות העסקיים והמתודולוגיה לחישוב ההכנסות המשותפות, המשקפות את תרומת שני הצדדים – משאבים לוגיסטיים ורגולטוריים, ידע טכנולוגי ויצירתי וניהול שוטף – תוך שמירה על שקיפות, הוגנות ויעדי רווחיות משותפים.
-* **סכום ההכנסות הכולל**: מכירות ברוטו של המוצרים בחודש הקלנדרי הקודם, כפי שיוצגו בדוח המכירות.
-* **הפחתות**: מסכום ההכנסות הכולל יופחתו הסכומים הבאים:
-    * מע"מ – בשיעור הקבוע בחוק מעת לעת.
-    * עלויות נלוות קבועות – 4% (ארבעה אחוזים) לצורך כיסוי עלויות תפעול ועבודה שוטפות.
-    * עלויות ישירות בפועל – אשר יכללו, בין היתר, עלויות רכישת חומרי גלם, עלויות אריזות, תשלום בפועל למפעל צד ג' בגין הייצור, והוצאות שיווק ישירות אשר יאושרו מראש ובכתב על ידי שני הצדדים.
-* **הרווח הנקי והחלוקה**: הסכום שנותר לאחר ביצוע כל ההפחתות הנ"ל יהווה את הרווח הנקי, והוא יחולק שווה בשווה (50%-50%) בין הצדדים.
-6.2. **שקיפות ודוחות**: חברה א' תספק לחברה ב', עד ה-20 בכל חודש קלנדרי (או ביום העסקים הראשון שלאחריו אם ה-20 אינו יום עסקים), דוח מכירות דיגיטלי מפורט ("**דוח המכירות**") עבור החודש הקודם. דוח המכירות יכלול פירוט מלא של סכום המכירות הכולל, כל ההפחתות שבוצעו, והחישוב המפורט של הרווח הנקי המגיע לכל צד. הצדדים יקיימו פגישה חודשית קבועה (פיזית או מרחוק), ב-20 לחודש או בסמוך לכך, לסקירת דוח המכירות, אישור החישובים ודיון בכל עניין פיננסי או תפעולי רלוונטי.
-6.3. **תנאי תשלום**: חברה ב' תוציא חשבונית מס/קבלה לחברה א' עבור חלקה ברווח הנקי (50%) לאחר הפגישה החודשית ואישור דוח המכירות. חברה א' תשלם את החשבונית באמצעות העברה בנקאית בתוך 4 (ארבעה) ימי עסקים ממועד הפגישה החודשית או מה-20 לחודש, המאוחר מביניהם.
-6.4. **תמורה כוללת**: מובהר כי חלקה של חברה ב' ברווח הנקי (50%) מהווה תמורה מלאה ובלעדית עבור הרישיון הבלעדי לשימוש במותג ובקניין הרוחני הקולינרי (לרבות המתכונים והטכניקה הסודית), וכן עבור שירותי הפיקוח והניהול על תהליך הייצור ותמיכה טכנית וליווי כפי שנקבע בהסכם.
+### 3.1. אחריות צד א’ – “הזרוע המבצעת”
 
-**7. סודיות והגנה על מידע**
-7.1. **התחייבות לסודיות**: הצדדים, וכן בעלי המניות שלהם, הדירקטורים, נושאי המשרה, העובדים, היועצים והקבלנים מטעמם, מתחייבים לשמור על סודיות מוחלטת של כל המידע החסוי (כהגדרתו לעיל) שנחשף להם במסגרת הסכם זה או בקשר אליו. המידע החסוי לא ייחשף לצד שלישי כלשהו, ולא ייעשה בו כל שימוש, למעט לצורך ביצוע התחייבויות הצדדים על פי הסכם זה, וזאת בכפוף להוראות סעיף 7.2 להלן.
-7.2. **חשיפה מותרת**: חשיפת מידע חסוי לצדדים שלישיים תתאפשר אך ורק במידה הנדרשת באופן סביר וספציפי לצורך ביצוע ההסכם (כגון מפעל צד ג', מהנדסי מזון, יועצים רגולטוריים, ספקים, לקוחות), ובלבד שצדדים שלישיים אלו יחתמו על הסכמי סודיות מחייבים, שתנאיהם אינם נופלים מתנאי סעיף זה. חברה א' תספק לחברה ב' עותק של הסכמי הסודיות הנ"ל בתוך 7 ימי עסקים מחתימתם, ככל שהדבר אינו סוד מסחרי של חברה א'. חובת דיווח שוטף לחברה ב' על שימוש במידע חסוי תוגדר בנספח ב'.
-7.3. **הגבלת שימוש במידע חסוי**: הצדדים ובעלי המניות שלהם מתחייבים שלא לעשות שימוש במידע החסוי מחוץ למסגרת המותג ועל פי מטרות הסכם זה, בין באופן עצמאי ובין בשיתוף פעולה עם צד שלישי שאינו מורשה לכך על פי הסכם זה. כל שימוש כזה ייחשב הפרה מהותית של ההסכם.
-7.4. **תקופת סודיות**: חובת הסודיות על פי סעיף זה תחול לאורך כל תקופת ההסכם ולאחר סיומו, ללא הגבלת זמן, למעט במקרים שבהם המידע הופך לנחלת הכלל שלא כתוצאה מהפרת הסכם זה. חובה זו תחייב את הצדדים ואת בעלי המניות שלהם, גם במקרה של סגירת חברה, שינוי בתחום פעילותה, או שינוי מבני כלשהו.
-7.5. **הגנה הדדית**: הצדדים מתחייבים לנקוט בכל האמצעים הסבירים והמקובלים בתעשייה למניעת דליפה, שימוש לא מורשה, העתקה או חשיפה של המידע החסוי של הצד השני.
+<p class="indent"><strong>א. מימון וליווי כספי:</strong></p>
+<ul class="indent">
+    <li>צד א’ יישא במלוא המימון הנדרש לפיתוח-מוצר, הקמת קווי-ייצור, מימון מלאי, אריזות, פעילויות שיווק ומכירות, שירות לקוחות, תהליכי Recall (אם יידרשו), ביטוחי חבות-מוצר וכל תשלום לצדדים שלישיים הקשור למימוש ההסכם.</li>
+    <li>צד א’ יממן כל פעילות רגולטורית, לרבות אגרות רישוי, בדיקות מעבדה, רישום תקני ISO/HACCP, והעסקת יועצים חיצוניים.</li>
+</ul>
 
-**8. מצגים, התחייבויות והצהרות**
-8.1. כל צד מצהיר ומתחייב כלפי הצד השני כי, במועד חתימת הסכם זה ובכל עת לאורך תקופת ההסכם:
-* הוא תאגיד המאוגד והקיים כדין על פי חוקי מדינת ישראל, ובעל כל הסמכויות, הכשרים וההיתרים הנדרשים על פי דין ועל פי מסמכיו המייסדים להתקשר בהסכם זה ולבצע את כל התחייבויותיו על פיו.
-* לכריתת הסכם זה ולביצוע התחייבויותיו על פיו אין ולא תהיה כל הפרה של כל הסכם, התחייבות, מסמך משפטי או הסדר מחייב אחר שהצד הינו צד לו, או של כל דין, תקנה, צו שיפוטי, רגולציה או כל הוראה מחייבת אחרת החלים עליו.
-* הוא יבצע את כל התחייבויותיו על פי הסכם זה במקצועיות, במיומנות, במומחיות ובדייקנות מרבית, ובאופן שיעלה בקנה אחד עם הסטנדרטים הגבוהים ביותר המקובלים בתעשייה הרלוונטית.
-* חברה ב' ובעלי המניות של חברה ב' מצהירים כי המותג והקניין הרוחני הקולינרי הינם בבעלותם הבלעדית, וכי הוא אינו מפר כל זכות קניין רוחני של צד שלישי כלשהו.
-* חברה א' תקיים את כל דרישות הרגולציה והרישוי הנדרשות לייצור, שיווק ומכירת המוצרים בישראל ובכל שוק בינלאומי אליו תבחר להתרחב.
-* המוצרים, כפי שיפותחו, ייצרו וישווקו על ידי הצדדים, יהיו בטוחים לשימוש וראויים למאכל אדם, ויעמדו בכל דרישות החוק והרגולציה הרלוונטיות, לרבות תקינת בטיחות מזון.
-8.2. הצדדים מכירים בכך שהמצגים, ההתחייבויות וההצהרות המפורטים בסעיף זה הינם מהותיים ויסודיים להתקשרות בהסכם זה, וכי כל צד מסתמך על מצגי, התחייבויות והצהרות הצד השני באופן מלא ומוחלט בכניסתו להסכם.
+<p class="indent"><strong>ב. ייצור, לוגיסטיקה וניהול מפעל צד ג’:</strong></p>
+<ul class="indent">
+    <li>צד א’ יבחר, בחוות-דעת מקצועית ובאישור מוקדם מצד ב’, מפעל צד ג’ בעל רישיונות תקפים ממשרד הבריאות ורשות הכשרות המוסמכת.</li>
+    <li>צד א’ יהיה אחראי לניהול ההתקשרות החוזית עם המפעל, הפעלת מערך ייצור, בקרת מלאי, אחסון, קירור ושינוע בתנאים העומדים בתקנים.</li>
+    <li>צד א’ ידאג לכיול תקופתי של ציוד, תחזוקה מונעת והטמעת נהלי GMP (Good Manufacturing Practice).</li>
+</ul>
 
-**9. שיפוי ואחריות**
-9.1. **שיפוי הדדי**: כל צד (להלן: "**הצד המשפה**") ישפה, יגן ויפצה את הצד השני (להלן: "**הצד המוגן**"), את בעלי מניותיו, דירקטוריו, נושאי משרה בו, עובדיו, סוכניו וקבלני המשנה מטעמו, בגין כל נזק, הפסד, חבות, תביעה, דרישה, הוצאה (לרבות שכר טרחת עורכי דין והוצאות משפט סבירות ומוכחות) או עלות שייגרמו לצד המוגן כתוצאה מכל:
-* הפרה יסודית של מצג, התחייבות או הצהרה של הצד המשפה על פי הסכם זה.
-* רשלנות, מעשה או מחדל של הצד המשפה או מי מטעמו בקשר לביצוע הסכם זה.
-* תביעה או דרישה של צד שלישי הנובעת מפעולות או מחדלים של הצד המשפה במסגרת הסכם זה, או כתוצאה מהפרה של כל דין או רגולציה על ידי הצד המשפה.
-9.2. **ביטוחים**: חברה א' תשמור על פוליסות ביטוח מתאימות, לרבות ביטוח חבות מוצר, ביטוח אחריות מקצועית וביטוח צד ג', בכיסויים הולמים, לכיסוי סיכונים עסקיים הקשורים לייצור, אחסון, שיווק ומכירת המוצרים. חברה ב' תוודא כי מפעל צד ג' עומד בכל דרישות הבטיחות, האיכות והביטוח הנדרשות על פי דין, וכי הוא מחזיק בפוליסות ביטוח תקפות וברות כיסוי.
-9.3. **הודעה על תביעה**: צד מוגן שקיבל הודעה על תביעה, דרישה, או התראה העשויה להיות מכוסה על ידי סעיף שיפוי זה, יודיע על כך לצד המשפה בכתב, בהקדם האפשרי, ולא יאוחר מ-7 (שבעה) ימי עסקים ממועד קבלת ההודעה. הצד המשפה יהיה רשאי, על חשבונו ובתיאום מלא עם הצד המוגן, לנהל את ההגנה מפני תביעה כאמור.
+<p class="indent"><strong>ג. רגולציה, איכות וביטוח:</strong></p>
+<ul class="indent">
+    <li>תיק מוצר (Specification File), תוויות מוצר, סימון אלרגנים, הצגת ערכים תזונתיים ואישורי כשרות יטופלו במלואם ע״י צד א’.</li>
+    <li>צד א’ יחזיק פוליסות ביטוח חבות-מוצר ו-Product Recall בסכום שלא יפחת מ-₪___ מיליון לכל אירוע; אישור ביטוח חתום יצורף לנספח ה’.</li>
+    <li>במקרה של דרישת רגולטור (לדוגמה: משרד הבריאות) לביצוע שינוי או ריקול, נשיאה בעלות המלאה ודיווח לצד ב’ ללא דיחוי.</li>
+</ul>
 
-**10. החזרות מוצרים**
-10.1. **הפחתת החזרות מהרווח הנקי**: החזרות מוצרים (לרבות, אך לא רק, מוצרים פגומים, מוצרים שפג תוקפם, מוצרים שבוטלו על ידי לקוחות, או מוצרים שלא עמדו בבקרת האיכות המוסכמת) לא יופחתו באופן אוטומטי מסכום המכירות הכולל לפני חישוב הרווח הנקי. עם זאת, אם סך עלויות ההחזרות באותה תקופה עולה על 10% (עשרה אחוזים) מעלות חומרי הגלם של המוצרים שנמכרו באותה תקופה, אזי החלק העודף (מעל 10%) יופחת מסכום המכירות הכולל לפני חישוב הרווח הנקי.
-10.2. **אחריות לעלויות החזרות**: חברה א' תישא בכל עלויות ההחזרות (לרבות, אך לא רק, שינוע, אחסון, השמדה, החלפה, או פיצוי ללקוחות), למעט במקרים שבהם ההחזרות עולות על 10% (עשרה אחוזים) מעלות חומרי הגלם כאמור בסעיף 10.1 לעיל, ואז חברה ב' תישא בחלק היחסי של העלות העודפת (מעל 10%), בהתאם לחלוקת הרווחים (50%-50%).
-10.3. **דוחות ובקרה**: חברה א' תכין ותספק דוח חודשי מפורט של החזרות מוצרים, וחברה ב' תכין ותספק דוח ייצור חודשי. שני הדוחות ייבחנו וייאושרו במשותף בפגישה החודשית שתתקיים ב-20 לחודש, לצורך בחינה מדוקדקת של השפעת ההחזרות על חלוקת הרווחים וקבלת החלטות משותפות למיזעורן.
+<p class="indent"><strong>ד. שיווק, מכירות והפצה:</strong></p>
+<ul class="indent">
+    <li>צד א’ ישלב את מוצרי V-GOZA במאגר הלקוחות הקמעונאיים והמוסדיים שלו, ויקצה מנהל מותג ייעודי.</li>
+    <li>אסטרטגיית מדיה, תמחור, מבצעים והטבות יוגשו לאישור צד ב’ בכתב אחת לרבעון. אי-תגובה מצד ב’ בתוך 7 ימי עסקים תיחשב כהסכמה.</li>
+    <li>צד א’ יפיק דו״ח מכירות חודשי מפורט עד ל-20 בחודש שלאחריו, במבנה הקבוע בנספח ד’.</li>
+</ul>
 
-**11. תקופת ההסכם ותנאי סיום**
-11.1. **תקופת ההסכם**: הסכם זה ייכנס לתוקף מלא במועד חתימתו על ידי שני הצדדים ויהיה בתוקף למשך 10 (עשר) שנים קלנדריות ("**תקופת ההסכם הראשונית**").
-11.2. **חידוש אוטומטי**: בתום תקופת ההסכם הראשונית, ההסכם יתחדש אוטומטית לתקופות נוספות של 10 (עשר) שנים כל אחת, אלא אם כן אחד הצדדים מודיע בכתב לצד השני על רצונו שלא לחדש את ההסכם, וזאת לפחות 180 (מאה ושמונים) ימים קלנדריים לפני תום תקופת ההסכם הנוכחית.
-11.3. **סיום בהסכמה הדדית ובנקודות יציאה**: על אף האמור בסעיף 11.2, כל צד רשאי ליזום סיום מוסכם של ההסכם בנקודות יציאה קבועות המתרחשות אחת ל-5 (חמש) שנים (למשל, בתום 5, 10, 15 שנים וכו'). סיום כאמור יתאפשר בתנאי שהצד המבקש לסיים את ההסכם מודיע על כך בכתב לצד השני לפחות 90 (תשעים) ימי עסקים מראש, ומפרט את הסיבות לבקשתו, לרבות האפשרות כי הוא סבור שניתן להשיג תוצאות עסקיות טובות יותר בדרך אחרת. סיום ההסכם בנקודות יציאה אלו יתבצע אך ורק בהסכמה הדדית בכתב של שני הצדדים. במקרה של חוסר הסכמה כאמור, הצדדים יפנו להליך בוררות על פי הוראות סעיף 13 להלן.
-11.4. **סיום עקב הפרה יסודית**: כל צד יהיה רשאי לסיים הסכם זה באופן מיידי, על ידי מתן הודעה בכתב לצד המפר, אם הצד השני הפר הפרה יסודית של הוראה מהוראות הסכם זה, ולא תיקן את ההפרה בתוך 30 (שלושים) ימי עסקים ממועד קבלת הודעה בכתב מפורטת על ההפרה.
-11.5. **סיום עקב חדלות פירעון**: כל צד יהיה רשאי לסיים הסכם זה באופן מיידי, על ידי מתן הודעה בכתב לצד השני, אם הצד השני נכנס להליכי חדלות פירעון, פשיטת רגל, פירוק (מרצון או שלא מרצון), כינוס נכסים, או כל הליך דומה אחר, או אם מונה לו נאמן או כונס נכסים.
-11.6. **תוקף כלפי בעלי מניות**: מובהר כי הסכם זה מחייב את חברה א' וחברה ב', וכן את בעלי המניות שלהן כמייצגי היוצרים של המוצרים והשותפים העסקיים. התחייבויות הצדדים, ובפרט אלו הנוגעות לסודיות, קניין רוחני ואי-תחרות, יישארו בתוקף גם במקרה של סגירת חברה, שינוי תחום פעילות, או שינוי מבני בחברה, ויחולו על בעלי המניות כיחידים, ככל שהדבר ישים.
-11.7. **הוראות שרידות**: סעיפים 1 (הגדרות ופרשנות), 5 (קניין רוחני, בעלות ורישוי), 6 (תמורה כספית – לעניין סעיפים שחלוקת הרווח נובעת מהם גם לאחר סיום), 7 (סודיות והגנה על מידע), 8 (מצגים, התחייבויות והצהרות), 9 (שיפוי ואחריות), 11.6 (תוקף כלפי בעלי מניות), 11.7 (הוראות שרידות), 12 (אי-תחרות והגנה על המותג), 13 (פתרון סכסוכים) ו-14 (הוראות כלליות), וכן כל סעיף אחר שעל פי מהותו או מטרתו נועד לשרוד את סיום ההסכם, ימשיכו לעמוד בתוקפם המלא והמחייב גם לאחר סיום הסכם זה, מכל סיבה שהיא, ויחולו על הצדדים.
-11.8. **פקיעת הרישיון בסיום ההסכם**: מובהר כי בסיום הסכם זה מכל סיבה שהיא, יפקע הרישיון הבלעדי שהוענק לחברה א' על פי סעיף 5.3 לעיל. חברה א' לא תהא רשאית עוד לעשות שימוש במותג או בקניין הרוחני הקולינרי, למעט לצורך סגירה הדרגתית ומבוקרת של פעילות קיימת, שתתואם ותאושר מראש ובכתב על ידי חברה ב'.
+<p class="indent"><strong>ה. שקיפות ודיווח:</strong></p>
+<ul class="indent">
+    <li>מערכת Google Sheets מוגנת-גישה תכלול נתוני מכירות, החזרות, עלויות ישירות ונלוות בזמן-אמת.</li>
+    <li>צד א’ יאפשר לצד ב’ ביצוע ביקורת ספרים מדגמית אחת לשנה (בהודעה של 10 ימים). סטייה של > 2% תחויב בהחזר הפרש + ריבית.</li>
+</ul>
 
-**12. אי-תחרות והגנה על המותג**
-12.1. **התחייבות לאי-תחרות**: חברה א' וחברה ב', וכן בעלי המניות שלהם (ככל שהדבר רלוונטי ליחידים), מתחייבים בזאת, כל אחד כלפי משנהו, שלא לעסוק, במישרין או בעקיפין, בפיתוח, ייצור, שיווק, או מכירה של מוצרים מתחרים לקטגוריית המותג VGOZA (לרבות מוצרי בייקרי טבעוני, קינוחים טבעוניים, עוגות גבינה טבעוניות, מאפים טבעוניים, גבינות קשות ולמריחה טבעוניות), מחוץ למסגרת הסכם זה, וזאת בין באופן עצמאי ובין בשיתוף פעולה עם צד שלישי כלשהו.
-12.2. **היקף גיאוגרפי**: התחייבות אי-התחרות המפורטת בסעיף 12.1 תחול בכל שטח מדינת ישראל ובכל טריטוריה בינלאומית בה משווקים המוצרים תחת המותג, ללא הגבלה גיאוגרפית נוספת.
-12.3. **תקופת אי-תחרות לאחר סיום**: התחייבות אי-התחרות תחול לאורך כל תקופת ההסכם. לאחר סיום ההסכם מכל סיבה שהיא, היא תמשיך לחול למשך 2 (שנתיים) קלנדריות מלאות עבור שני הצדדים ובעלי מניותיהם. עם זאת, במקרה של סיום ההסכם בהסכמה הדדית מפורשת בכתב שאינה נובעת מהפרה יסודית של מי מהצדדים, ניתן יהיה להסכים על קיצור או ביטול תקופת אי-התחרות.
-12.4. **שיווק על ידי חברה ב'**: חברה ב' ובעלי מניותיה רשאים לשווק את מוצרי המותג VGOZA באופן עצמאי או באמצעות גורמים מטעמם, אך ורק בתיאום מראש ובכתב עם חברה א', ולצורך הגדלת היקף המכירות של המוצרים. מובהר כי כל מסמך מכירה רשמי (חשבוניות) יונפק על ידי חברה א' בלבד, וחלוקת הרווחים מכל מכירה כאמור תישאר כמפורט בסעיף 6 להסכם זה.
+### 3.2. אחריות צד ב’ – “הזרוע היוצרת”
 
-**13. פתרון סכסוכים**
-13.1. **ניסיון לפתרון ידידותי ומגשר**: במקרה של מחלוקת, אי-הסכמה או סכסוך הנוגעים להסכם זה או הנובעים ממנו, הצדדים ינסו לפתור אותה בדרכי משא ומתן ידידותי ובתום לב, בתוך 30 (שלושים) ימי עסקים ממועד מתן הודעה בכתב על המחלוקת על ידי אחד הצדדים. אם המחלוקת לא נפתרה, הצדדים יפנו להליך גישור בפני מגשר מוסכם, אשר ייבחר על ידי הצדדים בתוך 14 ימי עסקים מיום סיום המשא ומתן. עלויות הגישור יחולקו שווה בשווה בין הצדדים. הליך הגישור יימשך עד 30 ימי עסקים נוספים.
-13.2. **בוררות**: אם לא נמצא פתרון למחלוקת באמצעות גישור כאמור בסעיף 13.1, המחלוקת תופנה לבוררות בתל אביב, ישראל, בהתאם להוראות חוק הבוררות, התשכ"ח-1968, כפי שיהיה בתוקף מעת לעת. הבורר יהיה עורך דין או שופט בדימוס בעל מומחיות בתחום המסחרי/קניין רוחני, וייבחר בהסכמת הצדדים. בהיעדר הסכמה על זהות הבורר בתוך 14 ימי עסקים ממועד הפנייה לבוררות, הוא ימונה על ידי נשיא לשכת עורכי הדין בישראל. הליך הבוררות יהיה חסוי, והחלטת הבורר תהיה סופית ומחייבת את הצדדים, ולא תהיה עליה זכות ערעור, למעט במקרים המפורטים בחוק.
-13.3. **חוק חל וסמכות שיפוט**: הסכם זה יהיה כפוף לדיני מדינת ישראל ויפורש על פיהם. כל מחלוקת שלא תיפתר בבוררות כאמור לעיל, תידון באופן בלעדי ובסמכות ייחודית בבתי המשפט המוסמכים בתל אביב-יפו, ישראל.
+<p class="indent"><strong>א. העברת ידע (Technology Transfer):</strong></p>
+<ul class="indent">
+    <li>צד ב’ ימלא ויעדכן בתוכנת רישום שתבחר ע"י שני הצדדים לאחר חתימת החוזה, ובאופן מתואם אל מול סרגל הזמנים של מועדי ההשקה לכל מוצר ותכנון זמני ייצור את מלוא המתכונים, הפורמולציות, נהלי SOP ושלבי-ייצור, בפורמט דיגיטלי מוגן (PDF מוצפן או מערכת קבצים מאובטחת). מקור נתונים זה יהיה שקוף בין שני הצדדים, והוא ישמר באופן בטוח ביניהם בלבד, מלבד מקרים שבהם יש את הצורך כאמור להציג או לשתף גורם נוסף לצורת הבטחת ותקינות המוצר כפוף לרגולציה ואז תהייה חובתו של צד א' לוודא שהשיתוף מידע לצד ג' נשמר ומוגן, וזאת על ידי נספח מתאים.</li>
+    <li>כל העברה תלווה ב-“Batch Record” מפורט ובמפרט טכני (Bill-of-Materials) לרכיבים קריטיים.</li>
+</ul>
 
-**14. הוראות כלליות**
-14.1. **שפה**: הסכם זה נכתב ונחתם במקורו בשפה העברית, והגרסה העברית היא הגרסה המחייבת והקובעת לכל דבר ועניין. תרגום של הסכם זה לשפה אחרת, לרבות אנגלית, יסופק לצורך נוחות בלבד ולא ישמש לפרשנות או לכל מטרה משפטית אחרת.
-14.2. **תיקונים ושינויים**: כל שינוי, תוספת, השמטה או ויתור על הוראה מהוראות הסכם זה, יהיו תקפים ומחייבים רק אם ייעשו בכתב וייחתמו על ידי נציגים מוסמכים של שני הצדדים.
-14.3. **הודעות**: כל הודעה, דרישה, מסמך או תקשורת אחרת שתידרש או תותר על פי הסכם זה תישלח בכתב לכתובות הרשומות של הצדדים המפורטות במבוא להסכם, או לכל כתובת אחרת שתימסר בכתב מפורש על ידי הצד הרלוונטי. הודעות ייחשבו כנמסרו: (א) עם מסירה אישית לידי נציג מוסמך; (ב) 3 (שלושה) ימי עסקים לאחר משלוח בדואר רשום עם אישור מסירה; או (ג) עם קבלת אישור מסירה בדוא"ל, ובלבד שההודעה המקורית נשלחה גם באחת מהדרכים האחרות כמפורט לעיל.
-14.4. **שלמות ההסכם**: הסכם זה, על נספחיו, מהווה את מלוא ההבנות וההסכמות בין הצדדים ביחס לנושאו, ומבטל כל הסכם, מצג, הבנה, הצהרה או התחייבות קודמים, בין בכתב ובין בעל פה, ביחס לנושאו.
-14.5. **העברה ושעבוד**: אף צד לא יהיה רשאי להעביר, להמחות, לשעבד, למסור או להעניק רישיון משנה את זכויותיו או התחייבויותיו על פי הסכם זה, כולן או מקצתן, לצד שלישי כלשהו, ללא הסכמה מפורשת ומקדימה בכתב של הצד השני. על אף האמור לעיל, צד יהיה רשאי להעביר את זכויותיו וחובותיו על פי הסכם זה לחברת אם, חברת בת או חברה קשורה (Affiliate) של הצד המעביר, או במסגרת מיזוג, רכישה או שינוי שליטה מהותי, וזאת בכפוף למתן הודעה מראש בכתב לצד השני.
-14.6. **הפרדה (Severability)**: אם הוראה כלשהי בהסכם זה תיקבע על ידי בית משפט או רשות מוסמכת כבלתי חוקית, בלתי תקפה, בלתי ניתנת לאכיפה או בטלה, אזי הוראה זו תפורש באופן שיאפשר את אכיפתה במידה המרבית המותרת על פי דין, ויתר הוראות ההסכם יישארו בתוקפן המלא והמחייב.
-14.7. **ויתור (Waiver)**: אי-אכיפה של הוראה כלשהי בהסכם זה על ידי צד כלשהו, או עיכוב באכיפתה, לא ייחשבו כויתור על זכותו של אותו צד לאכוף הוראה זו או כל הוראה אחרת בהסכם בעתיד. כל ויתור על זכות, הוראה או תרופה על פי הסכם זה יהיה תקף רק אם ייעשה בכתב וייחתם על ידי נציג מוסמך של הצד המוותר.
-14.8. **עותקים (Counterparts)**: הסכם זה ניתן לחתימה במספר עותקים, כאשר כל עותק חתום ייחשב כמקור, וכל העותקים יחד יהוו הסכם אחד ויחיד. חתימה על עותק באמצעות פקס או דוא"ל (בפורמט PDF) תיחשב כחתימה מקורית לכל דבר ועניין.
-14.9. **ייצוג וייעוץ משפטי**: הצדדים מצהירים כי קראו, הבינו והסכימו לכל הוראות הסכם זה לאחר שקיבלו ייעוץ משפטי עצמאי ומקיף מטעמם, או לחלופין, ויתרו על קבלת ייעוץ כאמור מרצונם החופשי. הצדדים מאשרים כי לא יהיו להם כל טענות, תביעות או דרישות האחד כלפי משנהו בגין אי-קבלת ייעוץ משפטי או קבלת ייעוץ בלתי מספק.
-14.10. **שילוב נספחים**: הנספחים הנזכרים בהסכם זה מהווים חלק בלתי נפרד הימנו ודינם כדין ההסכם גופו.
+<p class="indent"><strong>ב. פיקוח מקצועי ואבטחת איכות:</strong></p>
+<ul class="indent">
+    <li>צד ב’ ימנה טכנולוג-מזון בכיר כמפקח צמוד ל-Manufacturing Start-Up, לרבות ניסוי-פיילוט ואישור Run-Rate תעשייתי.</li>
+    <li>בכל חריגה מתקן איכות, אספקת הנחיות לתיקון תוך 48 שעות; צד א’ יישם את ההנחיות וידווח על ביצוען.</li>
+</ul>
 
-**נספחים:**
+<p class="indent"><strong>ג. פיתוח מוצרים ושדרוגים:</strong></p>
+<ul class="indent">
+    <li>צד ב’ ימפה, אחת לשישה חודשים, מוצרים חדשים או שדרוגי-פורמולציה ויגיש NPI (New Product Introduction) Roadmap ללוח השקות (נספח א’).</li>
+    <li>עלויות פיתוח חומרי-גלם חדשים ימומנו ע״י צד א’, בכפוף לאישור דו-צדדי של Business Case מפורט.</li>
+</ul>
 
-**נספח א': לוח זמנים להשקות**
-(ייפרסם וייחתם תוך 14 ימי עסקים ממועד חתימת ההסכם.)
+<p class="indent"><strong>ד. בעלות וקניין רוחני:</strong></p>
+<ul class="indent">
+    <li>צד ב’ שומר על מלוא הזכויות במותג V-GOZA, סימני המסחר וה-Know-How.</li>
+    <li>פיתוחים עתידיים יהיו קניין צד ב’, אולם יוקנו אוטומטית ברישיון בלעדי לצד א’ ללא תמלוג-ביניים נוסף, בכפוף להסכם זה.</li>
+</ul>
 
-**נספח ב': הסכם סודיות (NDA) לצדדים שלישיים**
-תקופת סודיות: בין תחילת העבודה ועד 5 שנים לאחר סיום.
-חובת דיווח שוטף לחברה ב' על שימוש במידע חסוי.
+<p class="indent"><strong>ה. שיתוף-פעולה אסטרטגי:</strong></p>
+<ul class="indent">
+    <li>צד ב’ ישתתף בישיבות רבעוניות של Steering Committee לדיון ב-KPI (מכירות, שיעור החזרות, יעילות ייצור).</li>
+    <li>במיקוד אירועי-שיא (תערוכות, חגים, השקות בינ״ל) יעמיד צד ב’ שגרירי-מותג, שפים ומומחי תוכן שיווקי, בתיאום צד א’.</li>
+</ul>
 
-**נספח ג': מפרט מוצרים ומתכונים**
-(טבלה עם 40 הפריטים הראשונים: שם מוצר, קוד, רכיבים, תהליך ייצור, דרישות אחסון.)
+### 3.3. תחומי אחריות משותפים
 
-**נספח ד': מערכת דיווח דיגיטלית**
-(תיאור השימוש בגוגל שיטס מוגן או ERP מוסכם, פורמט דוח חודשי אוטומטי.)
+<ul class="indent">
+    <li><span class="section-num">1.</span> **בקרת סיכונים:** הצדדים יגבשו יחד “מפת סיכונים” (Risk-Matrix) שנתית ויתקנו אותה לפי צורך.</li>
+    <li><span class="section-num">2.</span> **קיימוּת (ESG):** הצדדים יפעלו לצמצום טביעת-רגל פחמנית, שימוש באריזות מתמחזרות ולציות לתקני B-Corp ככל שיאומצו.</li>
+    <li><span class="section-num">3.</span> **התנהלות מול הרשויות:** פניות רגולטוריות חריגות (דרישת Recall מחייב, התראה פלילית, קנס מנהלי) יטופלו במשותף תוך 24 שעות ממועד קבלתן.</li>
+</ul>
+
+<p class="indent">**הבהרה:** כל סעיף בלשון זכר/יחיד ייקרא גם בלשון נקבה/רבים לפי העניין. במקרה של אי-התאמה בין מסמך זה לנספחיו תגבר הוראת המסמך הראשי, אלא אם הנספח קובע במפורש אחרת.</p>
+
+---
+
+## 4. המשכיות ותוקף
+
+<p class="indent"><span class="section-num">4.1.</span> **תחולת ההסכם על ממשיכים ויורשים:**</p>
+<ul class="indent">
+    <li>הסכם זה יחייב ויחול גם על יורשי הצדדים, נציגיהם המורשים, נאמניהם, רוכשיהם וכל חליף או מקבל-זכויות אחר (Successors & Assigns), לרבות גוף שינבע ממיזוג, פיצול, שינוי צורת התאגדות, העברת שליטה או מכירת מלוא נכסי הפעילות הרלוונטיים.</li>
+</ul>
+<p class="indent"><span class="section-num">4.2.</span> **שינוי שם או צורת התאגדות:**</p>
+<ul class="indent">
+    <li>שינוי בשם הרשום, במבנה ההחזקות או בצורת ההתאגדות של צד כלשהו – לרבות Re-Domiciliation – לא ישפיע על תוקף ההסכם, והתחייבויותיו של אותו צד יוסיפו לעמוד כאילו לא חל שינוי.</li>
+</ul>
+<p class="indent"><span class="section-num">4.3.</span> **מיזוג, מכירה או פירוק:**</p>
+<ul class="indent">
+    <li>א. כל מיזוג, מכירה או העברת שליטה בצד מן הצדדים מותנים בכך שהישות הקולטת תיטול עליה, כתנאי מתלה ובכתב, את כל זכויות וחובות ההסכם, ללא שינוי.</li>
+    <li>ב. במקרה של פירוק או כינוס נכסים, הצד המתפרק (או הכונס/נאמן) יסדיר העברת הקניין הרוחני וההרשאות כך שהצד האחר יוכל להמשיך לנצל את זכויותיו לפי ההסכם.</li>
+</ul>
+<p class="indent"><span class="section-num">4.4.</span> **ערבות בעלי-מניות (רשות):**</p>
+<ul class="indent">
+    <li>מבלי לגרוע מן האמור, בעלי-המניות המייסדים של צד ב' (שמותיהם ומספרי זהותם יפורטו בנספח **) ערבים אישית, כל אחד לחוד, למילוי התחייבויות צד ב' כלפי מתן הרישיון ושמירת תוקפו עד תום תקופת ההסכם, אף אם צד ב' יחדל מלהתקיים כתאגיד.</li>
+</ul>
+<p class="indent"><span class="section-num">4.5.</span> **ביטול ופרעון מוקדם:**</p>
+<ul class="indent">
+    <li>אירוע שינוי שליטה, פירוק או חדלות-פירעון המונע מצדו של צד לקיים חיוב מהותי יזכה את הצד הנפגע בכל תרופות הדין – לרבות אכיפה או ביטול ההסכם ופיצוי מלא, לפי בחירתו. ולא יפגע בזכויות של צד א' ויכול להמשיך לעבוד עם הזכויות של המוצרים והטכניקה של צד ב'.</li>
+</ul>
+
+---
+
+## 5. תנאי אספקה ותיאום ייצור
+
+<p class="indent"><span class="section-num">5.1.</span> לוח השקות מפורט בתוך 14 ימי עסקים (נספח א').</p>
+<p class="indent"><span class="section-num">5.2.</span> צד ב' יעביר מתכונים ואפיון טכני; יפקח על הייצור.</p>
+<p class="indent"><span class="section-num">5.3.</span> צד א' יבחר ויממן מפעל צד ג' והתשתיות, יתאם הזמנות ויבטיח מלאי.</p>
+<p class="indent"><span class="section-num">5.4.</span> דיווח על סטיות | עיכובים – מיידית; זמינות מלאי – אחריות משותפת.</p>
+
+---
+
+## 6. תמורה כספית ותנאי תשלום
+
+<p>הצדדים מצהירים ומסכימים כי התמורה עבור הרישיון לשימוש בקניין הרוחני, פיקוח הייצור ומתן השירותים על ידי צד ב', תתבסס על חלוקת הרווח הנקי ממכירות מוצרי המותג באופן שווה בין הצדדים, בהתאם למנגנון הבא:</p>
+<p class="indent"><span class="section-num">6.1.</span> **חישוב הרווח הנקי וחלוקתו:**</p>
+<ul class="indent">
+    <li>מכירות ברוטו &gt; פחות מע״מ, 4 % עלויות נלוות קבועות, ועלויות ישירות = רווח נקי.</li>
+    <li>חלוקה: 50 % | 50 %.</li>
+</ul>
+<p class="indent"><span class="section-num">6.2.</span> דו״ח מכירות דיגיטלי עד 20 בחודש; פגישת תיאום חודשית.</p>
+<p class="indent"><span class="section-num">6.3.</span> חשבונית צד ב' = 50 % מהרווח הנקי; תשלום תוך 4 ימי עסקים.</p>
+<p class="indent"><span class="section-num">6.4.</span> התמורה המלאה לצד ב' היא חלקו ברווח הנקי – ללא תשלום נוסף.</p>
+<p class="indent"><span class="section-num">6.4א.</span> **הוצאות חריגות / שאינן קשורות ישירות למוצרים:**</p>
+<ul class="indent">
+    <li><span class="section-num">6.4א.1.</span> **הגדרה:** בכפוף לנספח ה׳, “הוצאה חריגה” היא כל תשלום או התחייבות כספית אשר אינה מסווגת כ-(א) “עלויות ישירות”, או (ב) “עלויות נלוות קבועות (4 %)”, ולגישת אחד הצדדים איננה הכרחית במישרין לייצור, לשיווק או למכירה השוטפת של המוצרים.</li>
+    <li><span class="section-num">6.4א.2.</span> **יוזם ההוצאה:** הצד המבקש לבצע הוצאה חריגה (“הצד היוזם”) ימציא לצד השני (“הצד הנבחן”) פנייה כתובה הכוללת, במלואה: תיאור מפורט של מהות ההוצאה; סכום משוער ומטבע התשלום; המטרה העסקית או התפעולית של ההוצאה; מועד הביצוע המבוקש; הצעת חלוקת העלות -- 100 % על היוזם / 50-50 / חלוקה אחרת.</li>
+    <li><span class="section-num">6.4א.3.</span> **אישור, שינוי או דחייה:** הצד הנבחן ישיב בכתב בתוך 14 ימי עסקים ממועד קבלת הבקשה, באופן הבא:
+        <table>
+            <thead>
+                <tr>
+                    <th>תגובת הצד הנבחן</th>
+                    <th>תוקף וקביעה</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>(א) אישור מלא</td>
+                    <td>ההוצאה תתווסף לנספח ה׳ ותחולק כנקוב בבקשה.</td>
+                </tr>
+                <tr>
+                    <td>(ב) אישור מותנה</td>
+                    <td>תינתן הסכמה בהסתייגויות (למשל שיעור השתתפות שונה); על הצד היוזם לאשר בכתב תוך 5 ימים נוספים.</td>
+                </tr>
+                <tr>
+                    <td>(ג) דחייה מנומקת</td>
+                    <td>הבקשה נדחית; הפירוט יכלול נימוקים עסקיים או תקציביים.</td>
+                </tr>
+                <tr>
+                    <td>(ד) אי-תגובה</td>
+                    <td>אי-מענה תוך 14 יום ייחשב דחייה לכל דבר ועניין.</td>
+                </tr>
+            </tbody>
+        </table>
+    </li>
+    <li><span class="section-num">6.4א.4.</span> **נשיאת עלות ברירת-מחדל:** אם ההוצאה לא אושרה (לפי סעיף 6.4א.3), רשאי הצד היוזם לבצעה על-חשבון עצמו; סכום זה לא יופחת ממכירות ולא יוכר בחישוב הרווח הנקי.</li>
+    <li><span class="section-num">6.4א.5.</span> **רישום ובקרה חשבונאית:** הוצאה חריגה שאושרה תירשם בטבלת GL Codes שבנספח ה׳ תחת קטגוריה חדשה “601-*** הוצאות חריגות מאושרות”. היא תופיע בדוח המכירות החודשי בסעיף נפרד, לרבות ציון תאריך האישור ושיעור ההשתתפות של כל צד.</li>
+</ul>
+<p class="indent"><span class="section-num">6.5.</span> **חשב-בורר לסיווג עלויות:**</p>
+<ul class="indent">
+    <li>מחלוקת בדבר סיווג או גובה עלות שתיזקף כ“עלויות ישירות” או “עלויות נלוות קבועות (4 %)” תועבר לרואה-חשבון מבקר עצמאי (“חשב-בורר”) שימונה בהסכמת הצדדים בתוך 7 ימים; ובהיעדר הסכמה – בידי יו״ר לשכת רו״ח בישראל. החלטת החשב-בורר תינתן בתוך 14 ימים, תהא סופית ומחייבת. שכר-טרחתו יישא בחלקים שווים.</li>
+</ul>
+<p class="indent"><span class="section-num">6.6.</span> **תמורה כוללת:** (כאן יבוא הסעיף הקודם שלך על תמורה כוללת אם קיים, במידה ולא, יחזור להיות חלק מסעיף 6.4).
+    מובהר כי חלקה של צד ב' ברווח הנקי (50%) מהווה תמורה מלאה ובלעדית עבור הרישיון הבלעדי לשימוש במותג ובקניין הרוחני (לרבות המתכונים והטכניקה הסודית), וכן עבור שירותי הפיקוח והניהול על תהליך הייצור ותמיכה טכנית וליווי כפי שנקבע בהסכם.
+</p>
+
+---
+
+## 7. סודיות והגנה על מידע
+
+<p class="indent"><span class="section-num">7.1.</span> **התחייבות לסודיות:** חובת סודיות מוחלטת, ללא הגבלת זמן.</p>
+<p class="indent"><span class="section-num">7.2.</span> **חשיפה מותרת:** חשיפה לצד ג' רק בכפוף ל-NDA (נספח ב') ודיווח לצד ב' תוך 7 ימים.</p>
+
+---
+
+## 8. מצגים, התחייבויות והצהרות
+
+<p class="indent"><span class="section-num">8.1.</span> שני הצדדים מצהירים על כשרות משפטית, בעלות בקניין הרוחני (צד ב') ועמידה ברגולציה (צד א') – והתחייבות למקצועיות ולאי-הפרת זכויות צד שלישי.</p>
+
+---
+
+## 9. שיפוי ואחריות
+
+<p class="indent"><span class="section-num">9.1.</span> **שיפוי הדדי:** שיפוי הדדי בגין: הפרות יסודיות, רשלנות ותביעות צד ג'.</p>
+<p class="indent"><span class="section-num">9.2.</span> **ביטוחים:** צד א' יחזיק ביטוח חבות-מוצר, מקצועי וצד ג'; צד ב' יוודא עמידת מפעל צד ג' בדרישות.</p>
+
+---
+
+## 10. החזרות מוצרים
+
+<p class="indent"><span class="section-num">10.1.</span> **הפחתת החזרות מהרווח הנקי:** החזרות ≤ 10 % מעלות חומרי-הגלם – על חשבון צד א'.</p>
+<p class="indent"><span class="section-num">10.2.</span> **אחריות לעלויות החזרות:** החזרות > 10 % – העלות העודפת תחולק 50 % | 50 %.</p>
+<p class="indent"><span class="section-num">10.3.</span> **דוחות ובקרה:** דו"ח החזרות חודשי; בחינה במפגש ה-20 בחודש.</p>
+
+---
+
+## 11. תקופת ההסכם ותנאי סיום
+
+<p class="indent"><span class="section-num">11.1.</span> **תקופה ראשונית:** 10 שנים.</p>
+<p class="indent"><span class="section-num">11.2.</span> **חידוש אוטומטי:** אוטומטי לעוד 10-שנים, אלא אם ניתנה הודעה 180-יום מראש.</p>
+<p class="indent"><span class="section-num">11.3.</span> **נקודת יציאה:** כל 5 שנים – בהודעה 90-יום ובהסכמה הדדית (או בוררות).</p>
+<p class="indent"><span class="section-num">11.4.</span> **סיום מידי:** הפרה יסודית שלא תוקנה תוך 30 יום | חדלות-פירעון.</p>
+<p class="indent"><span class="section-num">11.5.</span> **השלכות הסיום:** רישיון צד א' פוקע; סעיפי סודיות, אי-תחרות ותביעות שורדים.</p>
+
+---
+
+## 12. אי-תחרות והגנה על המותג
+
+<p class="indent"><span class="section-num">12.1.</span> **התחייבות לאי-תחרות:** איסור פיתוח/שיווק מוצר מתחרה במוצרי בייקרי טבעוני – בישראל ובעולם – לאורך ההסכם ו-שנתיים לאחריו.</p>
+<p class="indent"><span class="section-num">12.2.</span> **שיווק עצמאי על-ידי צד ב':** רשאי לשווק מוצרים בעצמו, בכפוף לתיאום וחשבוניות צד א'.</p>
+
+---
+
+## 13. יישוב סכסוכים
+
+<p class="indent"><span class="section-num">13.1.</span> **משא-ומתן ידידותי:** 30 יום.</p>
+<p class="indent"><span class="section-num">13.2.</span> **גישור:** 30 יום, מגשר מוסכם; עלויות חצי-חצי.</p>
+<p class="indent"><span class="section-num">13.3.</span> **בוררות:** בתל-אביב (חוק הבוררות, 1968); פסק בורר סופי.</p>
+<p class="indent"><span class="section-num">13.4.</span> **דין וסמכות שיורית:** בתי-המשפט בתל-אביב-יפו, ישראל.</p>
+
+---
+
+## 14. הוראות כלליות
+
+<p class="indent"><span class="section-num">14.1.</span> **שפת ההסכם:** עברית; תרגום לנוחות בלבד.</p>
+<p class="indent"><span class="section-num">14.2.</span> **תיקונים:** בכתב וחתומים; הודעות – בכתב לכתובות הצדדים.</p>
+<p class="indent"><span class="section-num">14.3.</span> **שלמות ההסכם:** (עם נספחיו) מבטל כל מצג או הסכם קודם.</p>
+<p class="indent"><span class="section-num">14.4.</span> **העברה | שעבוד זכויות:** רק בהסכמה בכתב (למעט לחברה-אם/בת).</p>
+<p class="indent"><span class="section-num">14.5.</span> **הפרדה (Severability), ויתור (Waiver), עותקים (Counterparts):** כמקובל.</p>
+<p class="indent"><span class="section-num">14.6.</span> **ייצוג וייעוץ משפטי:** כל צד מצהיר שקיבל (או ויתר על) ייעוץ משפטי עצמאי.</p>
 
 **ולראיה באו הצדדים על החתום:**
 
-**חברה א': פתרונות מזון בע"מ**
+**צד א': דגניך ותירושך בע"מ**
 שם: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 תפקיד: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 חתימה: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 תאריך: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-**חברה ב': ויגוזה בייקרי בע"מ**
+**צד ב': ויגוזה בייקרי בע"מ**
 שם: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 תפקיד: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 חתימה: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
@@ -623,7 +861,7 @@
                 // Appendix content
                 appendixA: `
                     <h3 class="font-bold mb-2">נספח א': לוח זמנים להשקות</h3>
-                    <p class="mb-4">נספח זה מפרט את לוח הזמנים המוסכם להשקה מסחרית של המוצרים תחת המותג "VGOZA", כהגדרתם בהסכם שיתוף הפעולה המסחרי. לוח הזמנים נועד להבטיח תיאום מיטבי בין הצדדים ולמקסם את פוטנציאל ההצלחה של ההשקות.</p>
+                    <p class="mb-4">נספח זה מפרט את לוח הזמנים המוסכם להשקה מסחרית של המוצרים תחת המותג "VGOZA", כהגדרתם בהסכם שיתוף הפעולה המסחרי. לוח הזמנים נועד להבטיח תיאום מיטבי בין הצדדים ולמקסם את פוטנציאל ההצלחה של ההשקות. זהו נספח קריטי המפרט את תאריכי היעד, האחראים לכל שלב, והערות רלוונטיות, ומבטיח תהליך NPI (New Product Introduction) מסודר ומתואם.</p>
                     <table class="w-full text-sm text-right text-gray-500 border border-gray-200 rounded-lg">
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                             <tr>
@@ -646,28 +884,28 @@
                                 <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">מוצר 1: [שם המוצר]</td>
                                 <td class="py-4 px-6">פיתוח סופי/התאמה, תיק רגולטורי, ייצור ניסיון</td>
                                 <td class="py-4 px-6">[תאריך]</td>
-                                <td class="py-4 px-6">חברה ב'/א'</td>
+                                <td class="py-4 px-6">צד ב'/א'</td>
                                 <td class="py-4 px-6"></td>
                             </tr>
                             <tr class="bg-white border-b">
                                 <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">מוצר 2: [שם המוצר]</td>
                                 <td class="py-4 px-6">פיתוח סופי/התאמה, תיק רגולטורי, ייצור ניסיון</td>
                                 <td class="py-4 px-6">[תאריך]</td>
-                                <td class="py-4 px-6">חברה ב'/א'</td>
+                                <td class="py-4 px-6">צד ב'/א'</td>
                                 <td class="py-4 px-6"></td>
                             </tr>
                             <tr class="bg-gray-50 border-b">
                                 <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">השקה רכה (Soft Launch)</td>
                                 <td class="py-4 px-6">הפצה מוגבלת לבדיקת שוק ומשוב לקוחות</td>
                                 <td class="py-4 px-6">[תאריך]</td>
-                                <td class="py-4 px-6">חברה א'</td>
+                                <td class="py-4 px-6">צד א'</td>
                                 <td class="py-4 px-6"></td>
                             </tr>
                              <tr class="bg-white border-b">
                                 <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">השקה רחבה</td>
                                 <td class="py-4 px-6">השקה רשמית בכל ערוצי השיווק והמכירה</td>
                                 <td class="py-4 px-6">[תאריך]</td>
-                                <td class="py-4 px-6">חברה א'</td>
+                                <td class="py-4 px-6">צד א'</td>
                                 <td class="py-4 px-6"></td>
                             </tr>
                             <tr class="bg-gray-50">
@@ -684,23 +922,23 @@
                 `,
                 appendixB: `
                     <h3 class="font-bold mb-2">נספח ב': הסכם סודיות (NDA) לצדדים שלישיים</h3>
-                    <p class="mb-4">נספח זה מתאר את הדרישות והתנאים להסכמי סודיות שייחתמו בין חברה א' לבין צדדים שלישיים (כגון מפעל צד ג', ספקים, מהנדסי מזון, יועצים רגולטוריים) אשר ייחשפו למידע חסוי הקשור לפעילות הצדדים על פי ההסכם הראשי. נספח זה יכלול גם את חובת הדיווח השוטף לחברה ב' על שימוש במידע חסוי על ידי צדדים שלישיים.</p>
+                    <p class="mb-4">נספח זה מתאר את הדרישות והתנאים להסכמי סודיות שייחתמו בין צד א' לבין צדדים שלישיים (כגון מפעל צד ג', ספקים, מהנדסי מזון, יועצים רגולטוריים) אשר ייחשפו למידע חסוי הקשור לפעילות הצדדים על פי ההסכם הראשי. נספח זה יכלול גם את חובת הדיווח השוטף לצד ב' על שימוש במידע חסוי על ידי צדדים שלישיים.</p>
                     <h4 class="font-semibold mt-4 mb-2">2. תנאי הסכם הסודיות עם צדדים שלישיים</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li>חברה א' תדאג כי כל צד שלישי שייחשף למידע חסוי יחתום על הסכם סודיות מחייב בכתב.</li>
+                        <li>צד א' תדאג כי כל צד שלישי שייחשף למידע חסוי יחתום על הסכם סודיות מחייב בכתב.</li>
                         <li>תנאי הסכם הסודיות עם צדדים שלישיים לא יפחתו בחומרתם מהוראות סעיף 7 (סודיות והגנה על מידע) בהסכם הראשי.</li>
                         <li>הסכם הסודיות עם צדדים שלישיים יכלול, בין היתר, התחייבות לשמירה על סודיות המידע החסוי, הגבלת השימוש במידע למטרות הספציפיות שלשמן נחשף, והתחייבות לאי-חשיפה לצדדים בלתי מורשים.</li>
-                        <li>תקופת הסודיות עם צדדים שלישיים תהיה בין תחילת העבודה ועד 5 (חמש) שנים לאחר סיום ההתקשרות בין חברה א' לאותו צד שלישי, או לפי תקופה ארוכה יותר ככל שיידרש על פי דין או יוסכם ספציפית.</li>
+                        <li>תקופת הסודיות עם צדדים שלישיים תהיה בין תחילת העבודה ועד 5 (חמש) שנים לאחר סיום ההתקשרות בין צד א' לאותו צד שלישי, או לפי תקופה ארוכה יותר ככל שיידרש על פי דין או יוסכם ספציפית.</li>
                     </ul>
-                    <h4 class="font-semibold mt-4 mb-2">3. חובת דיווח שוטף (חברה א' לחברה ב')</h4>
+                    <h4 class="font-semibold mt-4 mb-2">3. חובת דיווח שוטף (צד א' לצד ב')</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li>חברה א' מתחייבת לספק לחברה ב' עותק של כל הסכם סודיות שנחתם עם צד שלישי כאמור בסעיף 7.2 להסכם הראשי, בתוך 7 ימי עסקים ממועד חתימתו.</li>
-                        <li>חברה א' תדווח לחברה ב' באופן שוטף, בהתאם לדרישות חברה ב' ובאופן שלא יפגע בסודותיה המסחריים של חברה א', על כל מקרה של שימוש או חשיפה למידע חסוי על ידי צד שלישי (בכפוף להסכם הסודיות הרלוונטי), ועל כל אינדיקציה לדליפה או שימוש לא מורשה במידע חסוי על ידי צד שלישי. הדיווח יכלול את מהות המידע שנחשף, מטרת החשיפה והגורם אליו נחשף המידע.</li>
+                        <li>צד א' מתחייבת לספק לצד ב' עותק של כל הסכם סודיות שנחתם עם צד שלישי כאמור בסעיף 7.2 להסכם הראשי, בתוך 7 ימי עסקים ממועד חתימתו.</li>
+                        <li>צד א' תדווח לצד ב' באופן שוטף, בהתאם לדרישות צד ב' ובאופן שלא יפגע בסודותיה המסחריים של צד א', על כל מקרה של שימוש או חשיפה למידע חסוי על ידי צד שלישי (בכפוף להסכם הסודיות הרלוונטי), ועל כל אינדיקציה לדליפה או שימוש לא מורשה במידע חסוי על ידי צד שלישי. הדיווח יכלול את מהות המידע שנחשף, מטרת החשיפה והגורם אליו נחשף המידע.</li>
                     </ul>
                 `,
                 appendixC: `
                     <h3 class="font-bold mb-2">נספח ג': מפרט מוצרים ומתכונים</h3>
-                    <p class="mb-4">נספח זה מפרט את סדרת 40 המוצרים הראשונית תחת המותג "VGOZA", לרבות פרטי מתכונים, רכיבים, תהליכי ייצור ודרישות אחסון, כפי שהועברו מחברה ב' לחברה א'. כל המוצרים והמתכונים המפורטים בנספח זה מהווים חלק מהקניין הרוחני הקולינרי (כהגדרתו בהסכם הראשי).</p>
+                    <p class="mb-4">נספח זה מפרט את סדרת 40 המוצרים הראשונית תחת המותג "VGOZA", לרבות פרטי מתכונים, רכיבים, תהליכי ייצור ודרישות אחסון, כפי שהועברו מצד ב' לצד א'. כל המוצרים והמתכונים המפורטים בנספח זה מהווים חלק מהקניין הרוחני (כהגדרתו בהסכם הראשי).</p>
                     <h4 class="font-semibold mt-4 mb-2">2. טבלת מפרט מוצרים</h4>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm text-right text-gray-500 border border-gray-200 rounded-lg">
@@ -751,16 +989,16 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="mt-4 text-gray-700"><b>3. מתכונים מלאים ותהליכי ייצור מפורטים:</b> המתכונים המלאים, הכמויות המדויקות, וטכניקות הייצור המפורטות לכל אחד מהמוצרים המפורטים בסעיף 2 יסופקו בנפרד על ידי חברה ב' לחברה א' בפורמט מאובטח ומוגן (כגון קובצי PDF מוצפנים או מערכת גישה מוגבלת), כפי שיוסכם בין הצדדים, וייחשבו כחלק בלתי נפרד מנספח זה ומ"הקניין הרוחני הקולינרי".</p>
+                    <p class="mt-4 text-gray-700"><b>3. מתכונים מלאים ותהליכי ייצור מפורטים:</b> המתכונים המלאים, הכמויות המדויקות, וטכניקות הייצור המפורטות לכל אחד מהמוצרים המפורטים בסעיף 2 יסופקו בנפרד על ידי צד ב' לצד א' בפורמט מאובטח ומוגן (כגון קובצי PDF מוצפנים או מערכת גישה מוגבלת), כפי שיוסכם בין הצדדים, וייחשבו כחלק בלתי נפרד מנספח זה ומ"הקניין הרוחני".</p>
                     <p class="mt-2 text-gray-700"><b>4. עדכון והרחבת רשימת המוצרים:</b> כל הוספה של מוצרים חדשים לרשימה זו, או שינויים מהותיים במפרטים הקיימים, יעשו בהסכמה הדדית ובכתב של שני הצדדים, ויתועדו כנספחי משנה לנספח זה או בנספחים נפרדים, כפי שיוסכם.</p>
                 `,
                 appendixD: `
                     <h3 class="font-bold mb-2">נספח ד': מערכת דיווח דיגיטלית</h3>
-                    <p class="mb-4">נספח זה מפרט את המבנה, הפורמט ואופן השימוש במערכת הדיווח הדיגיטלית, אשר תשמש את חברה א' לדיווח שקוף לחברה ב' על מכירות, עלויות וחישוב הרווח הנקי, כמפורט בסעיף 6 (תמורה כספית ותנאי תשלום) להסכם הראשי.</p>
+                    <p class="mb-4">נספח זה מפרט את המבנה, הפורמט ואופן השימוש במערכת הדיווח הדיגיטלית, אשר תשמש את צד א' לדיווח שקוף לצד ב' על מכירות, עלויות וחישוב הרווח הנקי, כמפורט בסעיף 6 (תמורה כספית ותנאי תשלום) להסכם הראשי.</p>
                     <h4 class="font-semibold mt-4 mb-2">2. מערכת הדיווח המוסכמת</h4>
                     <ul class="list-disc list-inside space-y-2 text-gray-700">
                         <li>המערכת הדיגיטלית לניהול ודיווח מכירות תהיה: <b>גיליון נתונים מוגן ב-Google Sheets</b> (או פלטפורמת ERP/CRM אחרת שתוסכם בכתב על ידי שני הצדדים).</li>
-                        <li>חברה א' תהיה אחראית לתחזוקה, עדכון וניהול הגישה למערכת הדיווח. חברה ב' תקבל הרשאות צפייה מלאות לנתונים הרלוונטיים.</li>
+                        <li>צד א' תהיה אחראית לתחזוקה, עדכון וניהול הגישה למערכת הדיווח. צד ב' תקבל הרשאות צפייה מלאות לנתונים הרלוונטיים.</li>
                     </ul>
                     <h4 class="font-semibold mt-4 mb-2">3. פורמט דוח המכירות החודשי האוטומטי</h4>
                     <p class="mb-2">דוח המכירות החודשי יוצג בפורמט הבא:</p>
@@ -842,13 +1080,13 @@
                                     <td class="py-4 px-6"></td>
                                 </tr>
                                 <tr class="bg-gray-50">
-                                    <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">- חלק חברה א' (50%)</td>
+                                    <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">- חלק צד א' (50%)</td>
                                     <td class="py-4 px-6">50% מהרווח הנקי</td>
                                     <td class="py-4 px-6">[סכום בשקלים חדשים]</td>
                                     <td class="py-4 px-6"></td>
                                 </tr>
                                 <tr class="bg-white">
-                                    <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">- חלק חברה ב' (50%)</td>
+                                    <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">- חלק צד ב' (50%)</td>
                                     <td class="py-4 px-6">50% מהרווח הנקי</td>
                                     <td class="py-4 px-6">[סכום בשקלים חדשים]</td>
                                     <td class="py-4 px-6"></td>
@@ -856,7 +1094,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <p class="mt-4 text-gray-700"><b>4. גישה ובקרה:</b> חברה א' תספק לחברה ב' גישה מלאה למערכת הדיווח לצורך צפייה ואימות הנתונים, ותתחייב לעדכן את הנתונים באופן שוטף ולא יאוחר מהמועדים המוגדרים בהסכם הראשי.</p>
+                    <p class="mt-4 text-gray-700"><b>4. גישה ובקרה:</b> צד א' תספק לצד ב' גישה מלאה למערכת הדיווח לצורך צפייה ואימות הנתונים, ותתחייב לעדכן את הנתונים באופן שוטף ולא יאוחר מהמועדים המוגדרים בהסכם הראשי.</p>
                 `
             };
             
@@ -903,8 +1141,8 @@
                     <div class="flex justify-between py-1 border-b text-red-600"><span>- עלויות נלוות (4%):</span> <span>${formatCurrency(associatedCosts)}</span></div>
                     <div class="flex justify-between py-1 border-b text-red-600"><span>- עלויות ישירות:</span> <span>${formatCurrency(directCosts)}</span></div>
                     <div class="flex justify-between py-2 border-b-2 border-gray-400 font-bold"><span>רווח נקי לחלוקה:</span> <span>${formatCurrency(netProfit)}</span></div>
-                    <div class="flex justify-between pt-2 text-lg text-green-700"><span>חלק חברה א' (50%):</span> <strong class="font-bold">${formatCurrency(companyAShare)}</strong></div>
-                    <div class="flex justify-between text-lg text-green-700"><span>חלק חברה ב' (50%):</span> <strong class="font-bold">${formatCurrency(companyBShare)}</strong></div>
+                    <div class="flex justify-between pt-2 text-lg text-green-700"><span>חלק צד א' (50%):</span> <strong class="font-bold">${formatCurrency(companyAShare)}</strong></div>
+                    <div class="flex justify-between text-lg text-green-700"><span>חלק צד ב' (50%):</span> <strong class="font-bold">${formatCurrency(companyBShare)}</strong></div>
                 `;
 
                 updateChart(vatAmount, associatedCosts, directCosts, netProfit);
@@ -978,8 +1216,8 @@
                     let chatHistory = [];
                     chatHistory.push({ role: "user", parts: [{ text: prompt }] });
                     const payload = { contents: chatHistory };
-                    const apiKey = ""; 
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+         const apiKey = "AIzaSyAlViM-Og3xtrEEmlAtJdFljcefFPlcy0I"; // <-- הזן/י כאן את מפתח ה-API האישי שלך מ-Google AI Studio
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                     
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -999,7 +1237,7 @@
                         console.error('Unexpected API response structure:', result);
                     }
                 } catch (error) {
-                    assistantResponseDiv.innerHTML = 'אירעה שגיאה בחיבור לשרת. אנא נסה שנית מאוחר יותר.';
+                    assistantResponseDiv.innerHTML = 'אירעה שגיאה בחיבור לשרת. אנא נסה שנית מאוחר יותר. ודא כי מפתח ה-API הוכנס כראוי.';
                     console.error('Error calling Gemini API:', error);
                 } finally {
                     assistantLoadingSpinner.classList.add('hidden');
